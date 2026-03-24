@@ -10,22 +10,11 @@
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; }
     .hacker-green { color: #00ff9d; }
     .accent-hacker { accent-color: #00ff9d; }
-    .btn-hacker {
-      background: #00ff9d;
-      color: #000;
-      font-weight: 600;
-    }
-    .btn-hacker:hover {
-      background: #00cc7a;
-      box-shadow: 0 0 20px #00ff9d88;
-    }
-    .modal {
-      animation: fadeIn 0.2s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
+    .btn-hacker { background: #00ff9d; color: #000; font-weight: 600; }
+    .btn-hacker:hover { background: #00cc7a; box-shadow: 0 0 20px #00ff9d88; }
+    .modal { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .player { animation: fadeIn 0.3s ease-out; }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200 min-h-screen">
@@ -48,7 +37,7 @@
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33]">
       <div class="flex justify-between items-center mb-5">
         <h2 class="font-semibold text-lg flex items-center gap-2 hacker-green">
-          <i class="fa-solid fa-bookmark"></i> Мої шаблони
+          <i class="fa-solid fa-bookmark"></i> Мої голоси
         </h2>
         <button onclick="showCreateTemplateModal()" class="hacker-green hover:text-white flex items-center gap-1 text-sm">
           <i class="fa-solid fa-plus"></i> Новий
@@ -64,21 +53,33 @@
           <span class="text-zinc-300">Текст для озвучки</span>
           <span id="charCount" class="text-zinc-500">0 / 1 000 000</span>
         </div>
-        <textarea id="textInput" rows="11" 
-                  class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl p-6 outline-none text-base resize-none"
-                  placeholder="Вставте або напишіть текст..."></textarea>
+        <textarea id="textInput" rows="11" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl p-6 outline-none text-base resize-none" placeholder="Вставте або напишіть текст..."></textarea>
       </div>
 
-      <button onclick="synthesize()" 
-              class="mt-6 w-full py-6 text-xl font-semibold btn-hacker rounded-3xl flex items-center justify-center gap-3">
+      <button onclick="synthesize()" class="mt-6 w-full py-6 text-xl font-semibold btn-hacker rounded-3xl flex items-center justify-center gap-3">
         <i class="fa-solid fa-play"></i> ОЗВУЧИТИ ТЕКСТ
       </button>
+
+      <!-- PLAYER -->
+      <div id="playerContainer" class="hidden mt-6 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33] player">
+        <div class="flex items-center justify-between mb-4">
+          <div id="playerStatus" class="text-emerald-400 font-medium">Готово</div>
+          <div id="audioDuration" class="text-zinc-400 text-sm"></div>
+        </div>
+        <audio id="audioPlayer" controls class="w-full"></audio>
+        <div class="flex gap-3 mt-4">
+          <button onclick="downloadAudio()" class="flex-1 py-3 btn-hacker rounded-3xl flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i> Завантажити MP3
+          </button>
+          <button onclick="hidePlayer()" class="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-3xl">Закрити</button>
+        </div>
+      </div>
     </div>
 
     <!-- НАЛАШТУВАННЯ -->
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 space-y-6 border border-[#00ff9d33]">
       <h2 class="font-semibold text-lg mb-2 hacker-green">Налаштування</h2>
-      
+      <!-- (всі елементи налаштувань залишені як були) -->
       <div>
         <label class="block text-xs text-zinc-400 mb-2">МОДЕЛЬ</label>
         <select id="modelSelect" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 outline-none text-sm">
@@ -90,30 +91,15 @@
       </div>
 
       <div class="space-y-5">
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Stability</span><span id="stabilityVal" class="hacker-green">0.75</span></div>
-          <input type="range" id="stability" min="0" max="1" step="0.01" value="0.75" class="w-full accent-hacker">
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Similarity</span><span id="similarityVal" class="hacker-green">0.85</span></div>
-          <input type="range" id="similarity" min="0" max="1" step="0.01" value="0.85" class="w-full accent-hacker">
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Style</span><span id="styleVal" class="hacker-green">0.10</span></div>
-          <input type="range" id="style" min="0" max="1" step="0.01" value="0.10" class="w-full accent-hacker">
-        </div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Stability</span><span id="stabilityVal" class="hacker-green">0.75</span></div><input type="range" id="stability" min="0" max="1" step="0.01" value="0.75" class="w-full accent-hacker"></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Similarity</span><span id="similarityVal" class="hacker-green">0.85</span></div><input type="range" id="similarity" min="0" max="1" step="0.01" value="0.85" class="w-full accent-hacker"></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Style</span><span id="styleVal" class="hacker-green">0.10</span></div><input type="range" id="style" min="0" max="1" step="0.01" value="0.10" class="w-full accent-hacker"></div>
       </div>
 
       <div class="pt-4 border-t border-zinc-700 flex flex-col gap-4 text-sm">
-        <label class="flex items-center gap-3">
-          <input type="checkbox" id="speakerBoost" checked class="w-5 h-5 accent-hacker">
-          Speaker Boost
-        </label>
+        <label class="flex items-center gap-3"><input type="checkbox" id="speakerBoost" checked class="w-5 h-5 accent-hacker"> Speaker Boost</label>
         <div class="flex items-center gap-4">
-          <label class="flex items-center gap-3">
-            <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-hacker">
-            Авто-паузи
-          </label>
+          <label class="flex items-center gap-3"><input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-hacker"> Авто-паузи</label>
           <input id="pauseDuration" type="number" value="1.2" step="0.1" class="w-20 bg-zinc-950 border border-zinc-700 rounded-3xl px-4 py-2 text-center">
           <span class="text-xs text-zinc-400">сек</span>
         </div>
@@ -122,8 +108,7 @@
       <div class="pt-6 border-t border-zinc-700">
         <p class="text-xs text-zinc-400 mb-2">VOICE ID</p>
         <div class="flex gap-2">
-          <input id="voiceIdInput" type="text" placeholder="Встав voice_id сюди" 
-                 class="flex-1 bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 text-sm outline-none">
+          <input id="voiceIdInput" type="text" placeholder="Встав voice_id сюди" class="flex-1 bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 text-sm outline-none">
           <button onclick="setVoiceId()" class="btn-hacker px-6 rounded-3xl text-sm">OK</button>
         </div>
         <div id="currentVoice" class="mt-3 text-xs hacker-green font-mono break-all"></div>
@@ -154,9 +139,9 @@
 <div id="templateModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
   <div class="modal bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-[#00ff9d33] relative">
     <button onclick="closeModal('templateModal')" class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white">×</button>
-    <h3 class="text-xl font-semibold mb-6 hacker-green">Новий шаблон</h3>
+    <h3 class="text-xl font-semibold mb-6 hacker-green">Новий голосовий шаблон</h3>
     <input id="templateName" placeholder="Назва шаблону" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none mb-6">
-    <button onclick="createTemplate()" class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти шаблон</button>
+    <button onclick="createVoiceTemplate()" class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти шаблон</button>
   </div>
 </div>
 
@@ -167,17 +152,15 @@ let currentToken = '';
 let currentVoiceId = '';
 let templates = [];
 let logs = [];
+let currentAudioUrl = '';
+let currentTaskId = null;
 
-// Безпечне завантаження даних
+// Завантаження даних
 try {
   currentToken = localStorage.getItem('voicerToken') || '';
   const saved = localStorage.getItem('voicerTemplates');
-  if (saved) {
-    templates = JSON.parse(saved).filter(t => t && t.name && t.text); // захист від битих даних
-  }
-} catch (e) {
-  console.warn('localStorage недоступний');
-}
+  if (saved) templates = JSON.parse(saved);
+} catch (e) {}
 
 // ================== LOG ==================
 function addLog(message, type = 'info') {
@@ -197,27 +180,14 @@ function clearLogs() {
 }
 
 // ================== МОДАЛКИ ==================
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.add('hidden');
-}
-
-function showTokenModal() {
-  closeModal('templateModal');
-  document.getElementById('tokenModal').classList.remove('hidden');
-}
-
-function showCreateTemplateModal() {
-  closeModal('tokenModal');
-  document.getElementById('templateModal').classList.remove('hidden');
-  document.getElementById('templateName').focus();
-}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function showTokenModal() { closeModal('templateModal'); document.getElementById('tokenModal').classList.remove('hidden'); }
+function showCreateTemplateModal() { closeModal('tokenModal'); document.getElementById('templateModal').classList.remove('hidden'); document.getElementById('templateName').focus(); }
 
 // ================== ТОКЕН ==================
 function updateTokenStatus() {
-  document.getElementById('tokenStatus').innerHTML = currentToken ? 
-    `<span class="hacker-green">✅ Підключено</span>` : `🔑 Токен`;
+  document.getElementById('tokenStatus').innerHTML = currentToken ? `<span class="hacker-green">✅ Підключено</span>` : `🔑 Токен`;
 }
-
 function saveToken() {
   currentToken = document.getElementById('tokenInput').value.trim();
   try { localStorage.setItem('voicerToken', currentToken); } catch(e){}
@@ -226,71 +196,85 @@ function saveToken() {
   addLog('Токен збережено', 'success');
 }
 
-// ================== ШАБЛОНИ (ВИПРАВЛЕНО) ==================
-function saveTemplates() {
-  try {
-    localStorage.setItem('voicerTemplates', JSON.stringify(templates));
-  } catch(e){}
-}
+// ================== ШАБЛОНИ ГОЛОСІВ ==================
+function saveTemplates() { try { localStorage.setItem('voicerTemplates', JSON.stringify(templates)); } catch(e){} }
 
 function renderTemplates() {
   const container = document.getElementById('templatesList');
-  container.innerHTML = '';
+  container.innerHTML = templates.length === 0 
+    ? `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає голосових шаблонів</div>` : '';
 
-  if (templates.length === 0) {
-    container.innerHTML = `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>`;
-    return;
-  }
-
-  templates.forEach((tmpl, i) => {
-    // Захист від битих шаблонів
-    if (!tmpl || !tmpl.name || !tmpl.text) return;
-
+  templates.forEach((t, i) => {
     const div = document.createElement('div');
-    div.className = "bg-zinc-950 hover:bg-zinc-800 p-4 rounded-2xl border border-zinc-700 hover:border-[#00ff9d33] cursor-pointer transition";
+    div.className = "bg-zinc-950 hover:bg-zinc-800 p-4 rounded-2xl border border-zinc-700 hover:border-[#00ff9d33] cursor-pointer transition flex justify-between items-center";
     div.innerHTML = `
-      <div class="font-medium text-white">${tmpl.name}</div>
-      <div class="text-xs text-zinc-400 line-clamp-2 mt-1">
-        ${tmpl.text.substring(0, 75)}${tmpl.text.length > 75 ? '...' : ''}
+      <div class="flex-1" onclick="useVoiceTemplate(${i})">
+        <div class="font-medium">${t.name}</div>
+        <div class="text-xs text-zinc-400">Voice ID: ${t.voice_id.slice(0,8)}...</div>
       </div>
+      <button onclick="deleteTemplate(${i}); event.stopImmediatePropagation()" class="text-red-400 hover:text-red-500 text-2xl px-3">🗑</button>
     `;
-    div.onclick = () => useTemplate(i);
     container.appendChild(div);
   });
 }
 
-function createTemplate() {
+function createVoiceTemplate() {
   const name = document.getElementById('templateName').value.trim();
-  const text = document.getElementById('textInput').value.trim();
+  if (!name) return alert("Введіть назву шаблону!");
 
-  if (!name) {
-    alert("Введіть назву шаблону!");
-    document.getElementById('templateName').focus();
-    return;
-  }
-  if (!text) {
-    alert("Спочатку напишіть текст у головне поле!");
-    const field = document.getElementById('textInput');
-    field.focus();
-    field.style.borderColor = '#ff5555';
-    setTimeout(() => field.style.borderColor = '', 2000);
-    return;
-  }
+  const template = {
+    name,
+    voice_id: currentVoiceId || document.getElementById('voiceIdInput').value.trim(),
+    model_id: document.getElementById('modelSelect').value,
+    voice_settings: {
+      stability: parseFloat(document.getElementById('stability').value),
+      similarity_boost: parseFloat(document.getElementById('similarity').value),
+      style: parseFloat(document.getElementById('style').value),
+      use_speaker_boost: document.getElementById('speakerBoost').checked
+    },
+    auto_pause_enabled: document.getElementById('autoPause').checked,
+    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value) || 1.2
+  };
 
-  templates.push({ name, text });
+  if (!template.voice_id) return alert("Спочатку вкажіть Voice ID!");
+
+  templates.push(template);
   saveTemplates();
   closeModal('templateModal');
   document.getElementById('templateName').value = '';
-
   renderTemplates();
-  addLog(`Шаблон "${name}" успішно створено`, 'success');
+  addLog(`Голосовий шаблон "${name}" збережено`, 'success');
 }
 
-function useTemplate(i) {
-  if (!templates[i] || !templates[i].text) return;
-  document.getElementById('textInput').value = templates[i].text;
-  document.getElementById('charCount').textContent = `${templates[i].text.length} / 1 000 000`;
-  addLog(`Завантажено шаблон: ${templates[i].name}`, 'success');
+function useVoiceTemplate(i) {
+  const t = templates[i];
+  currentVoiceId = t.voice_id;
+  document.getElementById('voiceIdInput').value = t.voice_id;
+  document.getElementById('currentVoice').textContent = t.voice_id;
+
+  document.getElementById('modelSelect').value = t.model_id;
+  document.getElementById('stability').value = t.voice_settings.stability;
+  document.getElementById('similarity').value = t.voice_settings.similarity_boost;
+  document.getElementById('style').value = t.voice_settings.style;
+  document.getElementById('speakerBoost').checked = t.voice_settings.use_speaker_boost;
+  document.getElementById('autoPause').checked = t.auto_pause_enabled;
+  document.getElementById('pauseDuration').value = t.auto_pause_duration;
+
+  // оновлюємо значення слайдерів
+  ['stability','similarity','style'].forEach(id => {
+    document.getElementById(id + 'Val').textContent = parseFloat(document.getElementById(id).value).toFixed(2);
+  });
+
+  addLog(`Застосовано шаблон: ${t.name}`, 'success');
+}
+
+function deleteTemplate(i) {
+  if (confirm(`Видалити шаблон "${templates[i].name}"?`)) {
+    templates.splice(i, 1);
+    saveTemplates();
+    renderTemplates();
+    addLog('Шаблон видалено', 'success');
+  }
 }
 
 // ================== VOICE ID ==================
@@ -302,15 +286,109 @@ function setVoiceId() {
   }
 }
 
-// ================== СИНТЕЗ ==================
+// ================== PLAYER ==================
+function showPlayer(audioUrl) {
+  currentAudioUrl = audioUrl;
+  const audio = document.getElementById('audioPlayer');
+  audio.src = audioUrl;
+  document.getElementById('playerContainer').classList.remove('hidden');
+
+  audio.onloadedmetadata = () => {
+    const min = Math.floor(audio.duration / 60);
+    const sec = Math.floor(audio.duration % 60);
+    document.getElementById('audioDuration').textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+}
+
+function hidePlayer() {
+  const audio = document.getElementById('audioPlayer');
+  audio.pause();
+  audio.src = '';
+  document.getElementById('playerContainer').classList.add('hidden');
+}
+
+function downloadAudio() {
+  if (!currentAudioUrl) return;
+  const a = document.createElement('a');
+  a.href = currentAudioUrl;
+  a.download = 'voicer_audio.mp3';
+  a.click();
+}
+
+// ================== СИНТЕЗ + POLLING ==================
 async function synthesize() {
   if (!currentToken) return alert('Введіть API токен!');
   if (!currentVoiceId) return alert('Вкажіть Voice ID!');
+
   const text = document.getElementById('textInput').value.trim();
-  if (!text) return alert('Введіть текст для озвучки!');
+  if (!text) return alert('Введіть текст!');
 
   addLog('Надсилаємо запит на синтез...', 'info');
-  // Тут додай свій fetch-код пізніше
+
+  const body = {
+    text,
+    voice_id: currentVoiceId,
+    model_id: document.getElementById('modelSelect').value,
+    auto_pause_enabled: document.getElementById('autoPause').checked,
+    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value) || 1.2,
+    voice_settings: {
+      stability: parseFloat(document.getElementById('stability').value),
+      similarity_boost: parseFloat(document.getElementById('similarity').value),
+      style: parseFloat(document.getElementById('style').value),
+      use_speaker_boost: document.getElementById('speakerBoost').checked
+    }
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/voice/synthesize`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (!data.task_id) throw new Error('Не отримали task_id');
+
+    addLog(`Задача створена • Task ID: ${data.task_id}`, 'success');
+    startPolling(data.task_id);
+
+  } catch (e) {
+    addLog(`Помилка: ${e.message}`, 'error');
+  }
+}
+
+function startPolling(taskId) {
+  let seconds = 0;
+  const statusEl = document.getElementById('playerStatus');
+  const container = document.getElementById('playerContainer');
+  
+  container.classList.remove('hidden');
+  statusEl.textContent = `Генерується... (${seconds}s)`;
+
+  const interval = setInterval(async () => {
+    seconds++;
+    statusEl.textContent = `Генерується... (${seconds}s)`;
+
+    try {
+      const res = await fetch(`${API_BASE}/voice/task/${taskId}`, {
+        headers: { 'Authorization': `Bearer ${currentToken}` }
+      });
+      const data = await res.json();
+
+      if (data.status === 'completed' && data.audio_url) {
+        clearInterval(interval);
+        statusEl.textContent = 'Готово';
+        showPlayer(data.audio_url);
+        addLog('Аудіо готове!', 'success');
+      } else if (data.status === 'failed') {
+        clearInterval(interval);
+        statusEl.textContent = 'Помилка генерації';
+        addLog('Генерація не вдалася', 'error');
+      }
+    } catch (e) {
+      // ігноруємо тимчасові помилки
+    }
+  }, 1500);
 }
 
 // ================== INIT ==================
@@ -320,8 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
   addLog('Voicer запущено — хакерський режим', 'success');
 
   document.getElementById('textInput').addEventListener('input', () => {
-    const count = document.getElementById('textInput').value.length;
-    document.getElementById('charCount').textContent = `${count} / 1 000 000`;
+    document.getElementById('charCount').textContent = `${document.getElementById('textInput').value.length} / 1 000 000`;
   });
 
   ['stability','similarity','style'].forEach(id => {
@@ -329,8 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el.oninput = () => document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
   });
 
-  // ESC для закриття
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       closeModal('tokenModal');
       closeModal('templateModal');
