@@ -8,25 +8,24 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', system-ui, sans-serif; }
-    .slider-thumb { accent-color: #10b981; }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
 <div class="max-w-6xl mx-auto p-6">
+
   <div class="flex items-center justify-between mb-8">
     <h1 class="text-4xl font-bold flex items-center gap-3">
       <i class="fa-solid fa-waveform text-emerald-500"></i>
       Voicer — ElevenLabs
     </h1>
-    <div id="tokenStatus" onclick="showTokenModal()" 
-         class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 rounded-2xl cursor-pointer border border-emerald-900">
+    <div onclick="showTokenModal()" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 rounded-2xl cursor-pointer border border-emerald-900">
       <i class="fa-solid fa-key"></i>
-      <span class="font-medium">Токен збережено ✓</span>
+      <span id="tokenStatus" class="font-medium">Токен збережено ✓</span>
     </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    
+
     <!-- Voice ID -->
     <div class="lg:col-span-3">
       <div class="bg-zinc-900 rounded-3xl p-6">
@@ -34,44 +33,34 @@
           <i class="fa-solid fa-microphone text-emerald-500"></i>
           <h2 class="text-xl font-semibold">Voice ID</h2>
         </div>
-        <p class="text-xs text-zinc-400 mb-3">Встав voice_id з ElevenLabs</p>
-        
-        <div class="flex gap-2 mb-4">
-          <input id="customVoiceId" type="text" 
-                 class="flex-1 bg-zinc-800 border border-zinc-700 focus:border-emerald-500 rounded-2xl px-5 py-3 outline-none text-sm font-mono"
-                 placeholder="lmMH7HJkyAb80H3rpol">
-          <button onclick="useCustomVoice()" 
-                  class="bg-emerald-600 hover:bg-emerald-700 px-6 rounded-2xl font-medium">Використати</button>
-        </div>
-        
-        <div id="customStatus" class="text-sm text-emerald-400 flex items-center gap-2">
-          <!-- динамічно заповнюється -->
-        </div>
+        <input id="customVoiceId" type="text" placeholder="lmMH7HJkyAb80H3rpol" 
+               class="w-full bg-zinc-800 border border-zinc-700 focus:border-emerald-500 rounded-2xl px-5 py-3 outline-none font-mono text-sm mb-3">
+        <button onclick="useCustomVoice()" 
+                class="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-2xl font-medium">Використати Voice ID</button>
+        <div id="customStatus" class="mt-4 text-emerald-400 text-sm"></div>
       </div>
     </div>
 
     <!-- Текст -->
     <div class="lg:col-span-5">
       <div class="bg-zinc-900 rounded-3xl p-6">
-        <div class="flex justify-between items-baseline mb-3">
+        <div class="flex justify-between mb-3">
           <label class="font-medium">Ваш текст</label>
           <span id="charCount" class="text-zinc-400 text-sm">0 / 1 000 000</span>
         </div>
-        <textarea id="textInput" rows="7" 
-                  class="w-full bg-zinc-800 rounded-2xl p-5 outline-none resize-none text-base leading-relaxed"
-                  placeholder="Dans le silence de la nuit, les étoiles murmurent des secrets anciens..."></textarea>
+        <textarea id="textInput" rows="8" class="w-full bg-zinc-800 rounded-2xl p-5 outline-none resize-none" placeholder="Вставте текст..."></textarea>
       </div>
     </div>
 
-    <!-- Налаштування -->
+    <!-- Налаштування (тільки те, що працює) -->
     <div class="lg:col-span-4">
-      <div class="bg-zinc-900 rounded-3xl p-6 h-full">
-        <h2 class="text-xl font-semibold mb-5">Налаштування</h2>
+      <div class="bg-zinc-900 rounded-3xl p-6">
+        <h2 class="text-xl font-semibold mb-5">Налаштування голосу</h2>
         
         <div class="space-y-6">
           <div>
             <label class="block text-sm mb-2">Модель</label>
-            <select id="modelSelect" class="w-full bg-zinc-800 rounded-2xl px-4 py-3 outline-none border border-zinc-700">
+            <select id="modelSelect" class="w-full bg-zinc-800 rounded-2xl px-4 py-3 outline-none">
               <option value="eleven_v3">🌟 Eleven v3 (найновіша)</option>
               <option value="eleven_multilingual_v2">🌍 Multilingual v2</option>
               <option value="eleven_turbo_v2_5">⚡ Turbo v2.5</option>
@@ -79,48 +68,23 @@
             </select>
           </div>
 
-          <div class="space-y-5">
-            <div>
-              <div class="flex justify-between text-sm mb-1">
-                <span>Stability</span>
-                <span id="stabilityVal" class="text-emerald-400 font-medium">0.75</span>
-              </div>
-              <input type="range" id="stability" min="0" max="1" step="0.05" value="0.75" class="slider-thumb w-full">
+          <!-- Працює тільки Stability -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>Stability (стабільність)</span>
+              <span id="stabilityVal" class="text-emerald-400 font-medium">0.75</span>
             </div>
-
-            <div>
-              <div class="flex justify-between text-sm mb-1">
-                <span>Similarity Boost</span>
-                <span id="similarityVal" class="text-emerald-400 font-medium">0.85</span>
-              </div>
-              <input type="range" id="similarity" min="0" max="1" step="0.05" value="0.85" class="slider-thumb w-full">
-            </div>
-
-            <div>
-              <div class="flex justify-between text-sm mb-1">
-                <span>Style Exaggeration</span>
-                <span id="styleVal" class="text-emerald-400 font-medium">0.0</span>
-              </div>
-              <input type="range" id="style" min="0" max="1" step="0.05" value="0.0" class="slider-thumb w-full">
-            </div>
-
-            <div>
-              <div class="flex justify-between text-sm mb-1">
-                <span>Speed</span>
-                <span id="speedVal" class="text-emerald-400 font-medium">1.0</span>
-              </div>
-              <input type="range" id="speed" min="0.5" max="2.0" step="0.05" value="1.0" class="slider-thumb w-full">
-            </div>
+            <input type="range" id="stability" min="0" max="1" step="0.05" value="0.75" class="w-full accent-emerald-500">
           </div>
 
-          <div class="flex items-center justify-between pt-2">
+          <!-- Авто-паузи (працює) -->
+          <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-emerald-500">
-              <span class="text-sm">Авто-паузи</span>
+              <span>Авто-паузи</span>
             </label>
             <div class="flex items-center gap-2">
-              <input id="pauseDuration" type="number" value="1" step="0.1" min="0.1" 
-                     class="w-16 bg-zinc-800 text-center rounded-xl py-1 text-sm">
+              <input id="pauseDuration" type="number" value="1.2" step="0.1" min="0.1" class="w-20 bg-zinc-800 rounded-xl px-3 py-1 text-center text-sm">
               <span class="text-sm text-zinc-400">сек</span>
             </div>
           </div>
@@ -129,26 +93,23 @@
     </div>
   </div>
 
-  <!-- Кнопка Озвучити -->
-  <div class="flex justify-center gap-4 mt-8">
+  <!-- Кнопка озвучити -->
+  <div class="flex justify-center gap-4 mt-10">
     <button onclick="synthesize()" 
-            class="bg-emerald-600 hover:bg-emerald-700 transition-all text-white text-xl font-semibold px-16 py-5 rounded-3xl flex items-center gap-3 shadow-lg shadow-emerald-900/50">
-      <i class="fa-solid fa-play"></i>
-      ОЗВУЧИТИ
+            class="bg-emerald-600 hover:bg-emerald-700 text-white text-2xl font-semibold px-20 py-6 rounded-3xl flex items-center gap-3">
+      <i class="fa-solid fa-play"></i> ОЗВУЧИТИ
     </button>
-    
-    <button onclick="clearAll()" 
-            class="bg-zinc-800 hover:bg-zinc-700 w-14 h-14 rounded-3xl flex items-center justify-center">
-      <i class="fa-solid fa-trash text-xl"></i>
+    <button onclick="clearAll()" class="bg-zinc-800 hover:bg-zinc-700 w-14 h-14 rounded-3xl flex items-center justify-center text-xl">
+      <i class="fa-solid fa-trash"></i>
     </button>
   </div>
 
-  <div id="status" class="text-center mt-4 text-emerald-400 font-medium min-h-[28px]"></div>
+  <div id="status" class="text-center mt-6 text-emerald-400 min-h-[28px]"></div>
 
   <!-- Player -->
-  <div id="playerContainer" class="hidden mt-6 bg-zinc-900 rounded-3xl p-6 max-w-2xl mx-auto">
+  <div id="playerContainer" class="hidden mt-8 bg-zinc-900 rounded-3xl p-6 max-w-2xl mx-auto">
     <audio id="audioPlayer" controls class="w-full"></audio>
-    <div class="flex gap-3 mt-4">
+    <div class="flex gap-3 mt-5">
       <button onclick="downloadCurrent()" class="flex-1 bg-emerald-900 hover:bg-emerald-800 py-4 rounded-2xl flex items-center justify-center gap-2">
         <i class="fa-solid fa-download"></i> Завантажити MP3
       </button>
@@ -156,24 +117,14 @@
     </div>
   </div>
 
-  <!-- Історія -->
-  <div class="mt-12 max-w-2xl mx-auto">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Історія (тимчасова)</h2>
-      <button onclick="clearHistory()" class="text-red-400 hover:text-red-300 text-sm">Очистити історію</button>
-    </div>
-    <div id="historyList" class="space-y-3"></div>
-  </div>
 </div>
 
 <!-- Token Modal -->
 <div id="tokenModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
   <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md">
     <h3 class="text-2xl font-bold mb-6">Ваш API токен</h3>
-    <input id="tokenInput" type="password" placeholder="sk_..." 
-           class="w-full bg-zinc-800 rounded-2xl px-5 py-4 text-lg outline-none mb-6">
-    <button onclick="saveToken()" 
-            class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 text-xl font-semibold rounded-3xl">Зберегти токен</button>
+    <input id="tokenInput" type="password" placeholder="sk_..." class="w-full bg-zinc-800 rounded-2xl px-5 py-4 text-lg outline-none mb-6">
+    <button onclick="saveToken()" class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 text-xl font-semibold rounded-3xl">Зберегти токен</button>
   </div>
 </div>
 
@@ -181,30 +132,19 @@
 // ================== Змінні ==================
 let currentToken = localStorage.getItem('elevenToken') || '';
 let selectedVoiceId = '';
-let currentBlobUrl = null;
-let history = JSON.parse(localStorage.getItem('voiceHistory') || '[]');
 
 // ================== Token ==================
 function updateTokenStatus() {
-  const el = document.getElementById('tokenStatus');
-  if (currentToken) {
-    el.innerHTML = `<i class="fa-solid fa-key"></i><span class="font-medium">Токен збережено ✓</span>`;
-    el.classList.add('text-emerald-400');
-  } else {
-    el.innerHTML = `<i class="fa-solid fa-key"></i><span>Ввести токен</span>`;
-  }
+  document.getElementById('tokenStatus').textContent = currentToken ? 'Токен збережено ✓' : 'Ввести токен';
 }
 
-function showTokenModal() {
-  document.getElementById('tokenModal').classList.remove('hidden');
-}
+function showTokenModal() { document.getElementById('tokenModal').classList.remove('hidden'); }
+function hideTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); }
 
 function saveToken() {
   currentToken = document.getElementById('tokenInput').value.trim();
-  if (currentToken) {
-    localStorage.setItem('elevenToken', currentToken);
-  }
-  document.getElementById('tokenModal').classList.add('hidden');
+  localStorage.setItem('elevenToken', currentToken);
+  hideTokenModal();
   updateTokenStatus();
 }
 
@@ -212,64 +152,72 @@ function saveToken() {
 function useCustomVoice() {
   const id = document.getElementById('customVoiceId').value.trim();
   if (!id) return alert('Введіть voice_id');
-  
   selectedVoiceId = id;
-  document.getElementById('customStatus').innerHTML = `
-    <i class="fa-solid fa-check"></i> 
-    Використовується voice_id: <span class="font-mono">${id}</span>
-  `;
+  document.getElementById('customStatus').innerHTML = `✅ Використовується: <span class="font-mono">${id}</span>`;
 }
 
-// ================== Синтез (використовуємо voicer.mat3u.com) ==================
+// ================== Синтез (виправлений) ==================
 async function synthesize() {
   const text = document.getElementById('textInput').value.trim();
   if (!text) return alert('Введіть текст');
   if (!selectedVoiceId) return alert('Вкажіть Voice ID');
   if (!currentToken) return alert('Введіть API токен');
 
-  const statusEl = document.getElementById('status');
-  statusEl.textContent = 'Обробка... (чекаємо результат)';
+  const status = document.getElementById('status');
+  status.textContent = 'Обробка... (чекаємо результат)';
 
   const payload = {
     text: text,
     voice_id: selectedVoiceId,
     model_id: document.getElementById('modelSelect').value,
     voice_settings: {
-      stability: parseFloat(document.getElementById('stability').value),
-      similarity_boost: parseFloat(document.getElementById('similarity').value),
-      style: parseFloat(document.getElementById('style').value),
-      speed: parseFloat(document.getElementById('speed').value)
+      stability: parseFloat(document.getElementById('stability').value)
     },
     auto_pause_enabled: document.getElementById('autoPause').checked,
     auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value)
   };
 
-  // Тут має бути реальний виклик до https://voicer.mat3u.com/api/v1/voice/synthesize
-  // (код синтезу можна вставити з попередньої версії)
+  try {
+    const res = await fetch('https://voicer.mat3u.com/api/v1/voice/synthesize', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${currentToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
 
-  alert('Синтез запущено!\n\n(повний код синтезу + polling можна додати як раніше)');
+    const data = await res.json();
+    if (data.task_id) {
+      // Тут можна додати polling, як у попередніх версіях
+      status.textContent = `Завдання створено. Task ID: ${data.task_id}`;
+      alert('Завдання запущено!\nTask ID: ' + data.task_id + '\n\n(додай polling для автоматичного отримання аудіо)');
+    } else {
+      status.textContent = 'Помилка: ' + (data.error || JSON.stringify(data));
+    }
+  } catch (err) {
+    status.textContent = 'Помилка з’єднання';
+    console.error(err);
+  }
 }
 
-// Решта функцій (playAudio, download, history тощо) можна взяти з попередньої версії
+function clearAll() {
+  document.getElementById('textInput').value = '';
+  document.getElementById('charCount').textContent = '0 / 1 000 000';
+}
 
+// Ініціалізація
 document.addEventListener('DOMContentLoaded', () => {
   updateTokenStatus();
 
-  // Оновлення лічильника символів
   const ta = document.getElementById('textInput');
   ta.addEventListener('input', () => {
     document.getElementById('charCount').textContent = `${ta.value.length} / 1 000 000`;
   });
 
-  // Оновлення значень слайдерів
-  ['stability','similarity','style','speed'].forEach(id => {
-    const slider = document.getElementById(id);
-    const val = document.getElementById(id + 'Val');
-    slider.addEventListener('input', () => val.textContent = parseFloat(slider.value).toFixed(2));
-  });
-
-  // Якщо є збережений voice_id — показати
-  if (selectedVoiceId) useCustomVoice();
+  // Оновлення значення Stability
+  const stab = document.getElementById('stability');
+  stab.oninput = () => document.getElementById('stabilityVal').textContent = parseFloat(stab.value).toFixed(2);
 });
 </script>
 </body>
