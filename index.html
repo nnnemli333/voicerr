@@ -14,7 +14,6 @@
     .btn-hacker:hover { background: #00cc7a; box-shadow: 0 0 20px #00ff9d88; }
     .modal { animation: fadeIn 0.2s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    .processing { animation: pulse 1.5s infinite; }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200 min-h-screen">
@@ -36,7 +35,7 @@
     <!-- ШАБЛОНИ -->
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33]">
       <div class="flex justify-between items-center mb-5">
-        <h2 class="font-semibold text-lg flex items-center gap-2 hacker-green"><i class="fa-solid fa-bookmark"></i> Мої шаблони</h2>
+        <h2 class="font-semibold text-lg flex items-center gap-2 hacker-green"><i class="fa-solid fa-bookmark"></i> Мої шаблони голосу</h2>
         <button onclick="showCreateTemplateModal()" class="hacker-green hover:text-white flex items-center gap-1 text-sm"><i class="fa-solid fa-plus"></i> Новий</button>
       </div>
       <div id="templatesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
@@ -60,10 +59,11 @@
     <!-- НАЛАШТУВАННЯ -->
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 space-y-6 border border-[#00ff9d33]">
       <h2 class="font-semibold text-lg mb-2 hacker-green">Налаштування</h2>
+      
       <div>
         <label class="block text-xs text-zinc-400 mb-2">МОДЕЛЬ</label>
         <select id="modelSelect" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 outline-none text-sm">
-          <option value="eleven_multilingual_v2">Multilingual v2</option>
+          <option value="eleven_multilingual_v2">Multilingual v2 (рекомендовано)</option>
           <option value="eleven_turbo_v2_5">Turbo v2.5</option>
           <option value="eleven_flash_v2_5">Flash v2.5</option>
           <option value="eleven_v3">v3</option>
@@ -96,24 +96,19 @@
     </div>
   </div>
 
-  <!-- PLAYER PANEL -->
+  <!-- PLAYER -->
   <div id="playerPanel" class="hidden mt-8 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33]">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-medium hacker-green flex items-center gap-2"><i class="fa-solid fa-volume-high"></i> Результат озвучки</h3>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-medium hacker-green flex items-center gap-2"><i class="fa-solid fa-volume-high"></i> Результат</h3>
       <button onclick="hidePlayer()" class="text-xs text-zinc-400 hover:text-red-400">закрити</button>
     </div>
-    <div class="flex flex-col md:flex-row items-center gap-4">
-      <audio id="audioPlayer" controls class="w-full md:flex-1"></audio>
-      <div class="flex items-center gap-3">
-        <span id="audioDuration" class="font-mono text-sm text-zinc-400">0:00</span>
-        <button onclick="downloadAudio()" class="btn-hacker px-8 py-3 rounded-3xl flex items-center gap-2 text-sm">
-          <i class="fa-solid fa-download"></i> Завантажити MP3
-        </button>
-      </div>
+    <div class="flex flex-col md:flex-row gap-4 items-center">
+      <audio id="audioPlayer" controls class="flex-1 w-full"></audio>
+      <button onclick="downloadAudio()" class="btn-hacker px-8 py-3 rounded-3xl flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-download"></i> Завантажити MP3
+      </button>
     </div>
-    <div id="processingStatus" class="hidden mt-4 text-center text-emerald-400 flex items-center justify-center gap-2 processing">
-      <i class="fa-solid fa-spinner fa-spin"></i> Генеруємо аудіо...
-    </div>
+    <div id="audioDuration" class="mt-2 font-mono text-sm text-zinc-400 text-center md:text-left"></div>
   </div>
 
   <!-- LOG -->
@@ -140,8 +135,8 @@
   <div class="modal bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-[#00ff9d33] relative">
     <button onclick="closeModal('templateModal')" class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white">×</button>
     <h3 class="text-xl font-semibold mb-6 hacker-green">Новий шаблон голосу</h3>
-    <input id="templateName" placeholder="Назва шаблону (наприклад: French Male)" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none mb-6">
-    <button onclick="createTemplate()" class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти налаштування голосу</button>
+    <input id="templateName" placeholder="Назва шаблону" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none mb-6">
+    <button onclick="createTemplate()" class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти шаблон</button>
   </div>
 </div>
 
@@ -155,7 +150,7 @@ let logs = [];
 let currentAudioUrl = null;
 let pollingInterval = null;
 
-// Завантаження даних
+// Завантаження
 try {
   currentToken = localStorage.getItem('voicerToken') || '';
   const saved = localStorage.getItem('voicerTemplates');
@@ -196,14 +191,12 @@ function saveToken() {
   addLog('Токен збережено', 'success');
 }
 
-// ================== ШАБЛОНИ (ТЕПЕР ЗБЕРІГАЮТЬ НАЛАШТУВАННЯ ГОЛОСУ) ==================
-function saveTemplates() {
-  try { localStorage.setItem('voicerTemplates', JSON.stringify(templates)); } catch(e){}
-}
+// ================== ШАБЛОНИ ==================
+function saveTemplates() { try { localStorage.setItem('voicerTemplates', JSON.stringify(templates)); } catch(e){} }
 
 function renderTemplates() {
   const container = document.getElementById('templatesList');
-  container.innerHTML = templates.length === 0 ? `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів голосу</div>` : '';
+  container.innerHTML = templates.length === 0 ? `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>` : '';
 
   templates.forEach((t, i) => {
     const div = document.createElement('div');
@@ -211,7 +204,7 @@ function renderTemplates() {
     div.innerHTML = `
       <div>
         <div class="font-medium">${t.name}</div>
-        <div class="text-xs text-zinc-400 font-mono">${t.voice_id.slice(0,12)}...</div>
+        <div class="text-xs text-zinc-400 font-mono">${t.voice_id ? t.voice_id.slice(0,12)+'...' : '—'}</div>
       </div>
       <div class="flex gap-3">
         <button onclick="useTemplate(${i}); event.stopImmediatePropagation()" class="text-[#00ff9d] hover:text-white text-xl">▶</button>
@@ -228,7 +221,7 @@ function createTemplate() {
   if (!name) return alert("Введіть назву шаблону!");
 
   const template = {
-    name,
+    name: name,
     voice_id: document.getElementById('voiceIdInput').value.trim() || currentVoiceId,
     model_id: document.getElementById('modelSelect').value,
     voice_settings: {
@@ -246,7 +239,7 @@ function createTemplate() {
   closeModal('templateModal');
   document.getElementById('templateName').value = '';
   renderTemplates();
-  addLog(`Шаблон голосу "${name}" збережено`, 'success');
+  addLog(`Шаблон "${name}" збережено`, 'success');
 }
 
 function deleteTemplate(i) {
@@ -261,23 +254,22 @@ function deleteTemplate(i) {
 function useTemplate(i) {
   const t = templates[i];
   currentVoiceId = t.voice_id;
-  document.getElementById('voiceIdInput').value = t.voice_id;
-  document.getElementById('currentVoice').textContent = t.voice_id;
+  document.getElementById('voiceIdInput').value = t.voice_id || '';
+  document.getElementById('currentVoice').textContent = t.voice_id || '';
 
-  document.getElementById('modelSelect').value = t.model_id;
-  document.getElementById('stability').value = t.voice_settings.stability;
-  document.getElementById('similarity').value = t.voice_settings.similarity_boost;
-  document.getElementById('style').value = t.voice_settings.style;
-  document.getElementById('speakerBoost').checked = t.voice_settings.use_speaker_boost;
-  document.getElementById('autoPause').checked = t.auto_pause_enabled;
-  document.getElementById('pauseDuration').value = t.auto_pause_duration;
+  document.getElementById('modelSelect').value = t.model_id || 'eleven_multilingual_v2';
+  document.getElementById('stability').value = t.voice_settings?.stability ?? 0.75;
+  document.getElementById('similarity').value = t.voice_settings?.similarity_boost ?? 0.85;
+  document.getElementById('style').value = t.voice_settings?.style ?? 0.10;
+  document.getElementById('speakerBoost').checked = t.voice_settings?.use_speaker_boost ?? true;
+  document.getElementById('autoPause').checked = t.auto_pause_enabled ?? false;
+  document.getElementById('pauseDuration').value = t.auto_pause_duration ?? 1.2;
 
-  // оновити значення слайдерів
   ['stability','similarity','style'].forEach(id => {
     document.getElementById(id + 'Val').textContent = parseFloat(document.getElementById(id).value).toFixed(2);
   });
 
-  addLog(`Завантажено налаштування голосу: ${t.name}`, 'success');
+  addLog(`Завантажено шаблон: ${t.name}`, 'success');
 }
 
 // ================== VOICE ID ==================
@@ -289,19 +281,17 @@ function setVoiceId() {
   }
 }
 
-// ================== СИНТЕЗ + ПОЛІНГ + ПЛЕЄР ==================
+// ================== СИНТЕЗ ==================
 async function synthesize() {
   if (!currentToken) return alert('Введіть API токен!');
   if (!currentVoiceId) return alert('Вкажіть Voice ID!');
   const text = document.getElementById('textInput').value.trim();
-  if (!text) return alert('Введіть текст для озвучки!');
+  if (!text) return alert('Введіть текст!');
 
-  addLog('Надсилаємо запит на синтез...', 'info');
-  document.getElementById('processingStatus').classList.remove('hidden');
-  document.getElementById('playerPanel').classList.remove('hidden');
+  addLog('Створюємо задачу на озвучку...', 'info');
 
   const body = {
-    text,
+    text: text,
     voice_id: currentVoiceId,
     model_id: document.getElementById('modelSelect').value,
     auto_pause_enabled: document.getElementById('autoPause').checked,
@@ -317,20 +307,22 @@ async function synthesize() {
   try {
     const res = await fetch(`${API_BASE}/voice/synthesize`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
+      headers: { 
+        'Authorization': `Bearer ${currentToken}`, 
+        'Content-Type': 'application/json' 
+      },
       body: JSON.stringify(body)
     });
-    const data = await res.json();
 
+    const data = await res.json();
     if (data.task_id) {
-      addLog(`Задача створена. Task ID: ${data.task_id}`, 'success');
+      addLog(`Задача створена → Task ID: ${data.task_id}`, 'success');
       startPolling(data.task_id);
     } else {
-      addLog('Не отримано task_id', 'error');
+      addLog('Не отримали task_id', 'error');
     }
   } catch (e) {
-    addLog(`Помилка запиту: ${e.message}`, 'error');
-    document.getElementById('processingStatus').classList.add('hidden');
+    addLog(`Помилка: ${e.message}`, 'error');
   }
 }
 
@@ -339,46 +331,42 @@ function startPolling(task_id) {
 
   pollingInterval = setInterval(async () => {
     try {
-      const res = await fetch(`${API_BASE}/voice/task/${task_id}`, {
+      const res = await fetch(`${API_BASE}/voice/status/${task_id}`, {
         headers: { 'Authorization': `Bearer ${currentToken}` }
       });
       const data = await res.json();
 
       if (data.status === 'completed' && data.audio_url) {
         clearInterval(pollingInterval);
-        document.getElementById('processingStatus').classList.add('hidden');
         showAudioPlayer(data.audio_url);
         addLog('Аудіо готове!', 'success');
-      } else if (data.status === 'failed') {
+      } else if (data.status === 'censored') {
         clearInterval(pollingInterval);
-        document.getElementById('processingStatus').classList.add('hidden');
-        addLog('Помилка генерації аудіо', 'error');
+        addLog('Текст містить цензуру. Спробуйте змінити слова.', 'error');
       }
     } catch (e) {}
-  }, 1200);
+  }, 1500);
 }
 
 function showAudioPlayer(url) {
   currentAudioUrl = url;
   const player = document.getElementById('audioPlayer');
   player.src = url;
+  document.getElementById('playerPanel').classList.remove('hidden');
 
-  // Тривалість
   const audio = new Audio(url);
   audio.onloadedmetadata = () => {
     const min = Math.floor(audio.duration / 60);
     const sec = Math.floor(audio.duration % 60);
-    document.getElementById('audioDuration').textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    document.getElementById('audioDuration').textContent = `Тривалість: ${min}:${sec < 10 ? '0' : ''}${sec}`;
   };
-
-  player.play().catch(() => {});
 }
 
 function downloadAudio() {
   if (!currentAudioUrl) return;
   const a = document.createElement('a');
   a.href = currentAudioUrl;
-  a.download = `voicer_${new Date().toISOString().slice(0,19)}.mp3`;
+  a.download = `voicer_${Date.now()}.mp3`;
   a.click();
 }
 
@@ -392,11 +380,10 @@ function hidePlayer() {
 document.addEventListener('DOMContentLoaded', () => {
   updateTokenStatus();
   renderTemplates();
-  addLog('Voicer запущено — хакерський режим', 'success');
+  addLog('Voicer готовий — використовуємо реальний API', 'success');
 
   document.getElementById('textInput').addEventListener('input', () => {
-    const count = document.getElementById('textInput').value.length;
-    document.getElementById('charCount').textContent = `${count} / 1 000 000`;
+    document.getElementById('charCount').textContent = `${document.getElementById('textInput').value.length} / 1 000 000`;
   });
 
   ['stability','similarity','style'].forEach(id => {
@@ -404,12 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el.oninput = () => document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
   });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal('tokenModal');
-      closeModal('templateModal');
-    }
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('tokenModal'); closeModal('templateModal'); } });
 });
 </script>
 </body>
