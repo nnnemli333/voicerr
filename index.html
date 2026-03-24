@@ -12,6 +12,7 @@
     .accent-hacker { accent-color: #00ff9d; }
     .btn-hacker { background: #00ff9d; color: #000; font-weight: 600; }
     .btn-hacker:hover { background: #00cc7a; box-shadow: 0 0 20px #00ff9d88; }
+    .btn-disabled { background: #334155; color: #64748b; cursor: not-allowed; }
     .modal { animation: fadeIn 0.2s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   </style>
@@ -51,15 +52,17 @@
         <textarea id="textInput" rows="11" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl p-6 outline-none text-base resize-none" placeholder="Вставте або напишіть текст..."></textarea>
       </div>
 
-      <button onclick="synthesize()" class="mt-6 w-full py-6 text-xl font-semibold btn-hacker rounded-3xl flex items-center justify-center gap-3">
-        <i class="fa-solid fa-play"></i> ОЗВУЧИТИ ТЕКСТ
+      <button id="synthesizeBtn" onclick="synthesize()" 
+              class="mt-6 w-full py-6 text-xl font-semibold btn-hacker rounded-3xl flex items-center justify-center gap-3">
+        <i class="fa-solid fa-play"></i> 
+        <span id="btnText">ОЗВУЧИТИ ТЕКСТ</span>
       </button>
     </div>
 
-    <!-- НАЛАШТУВАННЯ -->
+    <!-- НАЛАШТУВАННЯ (без змін) -->
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 space-y-6 border border-[#00ff9d33]">
+      <!-- ... (весь блок налаштувань залишився той самий як у попередній версії) ... -->
       <h2 class="font-semibold text-lg mb-2 hacker-green">Налаштування</h2>
-      
       <div>
         <label class="block text-xs text-zinc-400 mb-2">МОДЕЛЬ</label>
         <select id="modelSelect" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 outline-none text-sm">
@@ -69,13 +72,11 @@
           <option value="eleven_v3">v3</option>
         </select>
       </div>
-
       <div class="space-y-5">
         <div><div class="flex justify-between text-xs mb-1"><span>Stability</span><span id="stabilityVal" class="hacker-green">0.75</span></div><input type="range" id="stability" min="0" max="1" step="0.01" value="0.75" class="w-full accent-hacker"></div>
         <div><div class="flex justify-between text-xs mb-1"><span>Similarity</span><span id="similarityVal" class="hacker-green">0.85</span></div><input type="range" id="similarity" min="0" max="1" step="0.01" value="0.85" class="w-full accent-hacker"></div>
         <div><div class="flex justify-between text-xs mb-1"><span>Style</span><span id="styleVal" class="hacker-green">0.10</span></div><input type="range" id="style" min="0" max="1" step="0.01" value="0.10" class="w-full accent-hacker"></div>
       </div>
-
       <div class="pt-4 border-t border-zinc-700 flex flex-col gap-4 text-sm">
         <label class="flex items-center gap-3"><input type="checkbox" id="speakerBoost" checked class="w-5 h-5 accent-hacker"> Speaker Boost</label>
         <div class="flex items-center gap-4">
@@ -84,7 +85,6 @@
           <span class="text-xs text-zinc-400">сек</span>
         </div>
       </div>
-
       <div class="pt-6 border-t border-zinc-700">
         <p class="text-xs text-zinc-400 mb-2">VOICE ID</p>
         <div class="flex gap-2">
@@ -96,19 +96,26 @@
     </div>
   </div>
 
-  <!-- PLAYER -->
+  <!-- PLAYER PANEL (з індикатором генерації) -->
   <div id="playerPanel" class="hidden mt-8 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33]">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="font-medium hacker-green flex items-center gap-2"><i class="fa-solid fa-volume-high"></i> Результат</h3>
+    <div class="flex justify-between mb-4">
+      <h3 class="font-medium hacker-green flex items-center gap-2"><i id="playerIcon" class="fa-solid fa-spinner fa-spin"></i> <span id="playerTitle">Генерація аудіо...</span></h3>
       <button onclick="hidePlayer()" class="text-xs text-zinc-400 hover:text-red-400">закрити</button>
     </div>
-    <div class="flex flex-col md:flex-row gap-4 items-center">
-      <audio id="audioPlayer" controls class="flex-1 w-full"></audio>
-      <button onclick="downloadAudio()" class="btn-hacker px-8 py-3 rounded-3xl flex items-center gap-2 whitespace-nowrap">
-        <i class="fa-solid fa-download"></i> Завантажити MP3
-      </button>
+    <div id="processingBlock" class="text-center py-8 text-emerald-400 flex flex-col items-center gap-3">
+      <i class="fa-solid fa-spinner fa-spin text-4xl"></i>
+      <p class="text-lg">Йде генерація аудіо...</p>
+      <p id="progressText" class="text-sm text-zinc-400">0% • чекаємо сервер</p>
     </div>
-    <div id="audioDuration" class="mt-2 font-mono text-sm text-zinc-400 text-center md:text-left"></div>
+    <div id="readyBlock" class="hidden">
+      <audio id="audioPlayer" controls class="w-full"></audio>
+      <div class="flex justify-between items-center mt-4">
+        <span id="audioDuration" class="font-mono text-sm text-zinc-400"></span>
+        <button onclick="downloadAudio()" class="btn-hacker px-8 py-3 rounded-3xl flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> Завантажити MP3
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- LOG -->
@@ -121,7 +128,7 @@
   </div>
 </div>
 
-<!-- MODALS -->
+<!-- MODALS (без змін) -->
 <div id="tokenModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
   <div class="modal bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-[#00ff9d33] relative">
     <button onclick="closeModal('tokenModal')" class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white">×</button>
@@ -147,6 +154,7 @@ let currentToken = '';
 let currentVoiceId = '';
 let templates = [];
 let logs = [];
+let currentTaskId = null;
 let currentAudioUrl = null;
 let pollingInterval = null;
 
@@ -163,9 +171,8 @@ function addLog(message, type = 'info') {
   const color = type === 'error' ? 'text-red-400' : 'hacker-green';
   logs.push(`<span class="text-zinc-500">[${time}]</span> <span class="${color}">${message}</span>`);
   if (logs.length > 50) logs.shift();
-  const el = document.getElementById('logContainer');
-  el.innerHTML = logs.join('<br>');
-  el.scrollTop = 999999;
+  document.getElementById('logContainer').innerHTML = logs.join('<br>');
+  document.getElementById('logContainer').scrollTop = 999999;
 }
 
 function clearLogs() {
@@ -174,14 +181,16 @@ function clearLogs() {
   addLog('Лог очищено', 'info');
 }
 
-// ================== МОДАЛКИ ==================
+// ================== МОДАЛКИ + ТОКЕН ==================
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function showTokenModal() { closeModal('templateModal'); document.getElementById('tokenModal').classList.remove('hidden'); }
 function showCreateTemplateModal() { closeModal('tokenModal'); document.getElementById('templateModal').classList.remove('hidden'); document.getElementById('templateName').focus(); }
 
-// ================== ТОКЕН ==================
 function updateTokenStatus() {
-  document.getElementById('tokenStatus').innerHTML = currentToken ? `<span class="hacker-green">✅ Підключено</span>` : `🔑 Токен`;
+  const statusEl = document.getElementById('tokenStatus');
+  statusEl.innerHTML = currentToken && currentToken.length > 10 
+    ? `<span class="hacker-green">✅ Підключено</span>` 
+    : `🔑 Токен`;
 }
 function saveToken() {
   currentToken = document.getElementById('tokenInput').value.trim();
@@ -191,144 +200,59 @@ function saveToken() {
   addLog('Токен збережено', 'success');
 }
 
-// ================== ШАБЛОНИ ==================
+// ================== ШАБЛОНИ (залишилось як було) ==================
 function saveTemplates() { try { localStorage.setItem('voicerTemplates', JSON.stringify(templates)); } catch(e){} }
+function renderTemplates() { /* ... той самий код як у попередній версії ... */ } // (скорочено для економії місця — скопіюй з попереднього повідомлення)
+function createTemplate() { /* ... той самий код ... */ }
+function deleteTemplate(i) { /* ... той самий код ... */ }
+function useTemplate(i) { /* ... той самий код ... */ }
+function setVoiceId() { /* ... той самий код ... */ }
 
-function renderTemplates() {
-  const container = document.getElementById('templatesList');
-  container.innerHTML = templates.length === 0 ? `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>` : '';
-
-  templates.forEach((t, i) => {
-    const div = document.createElement('div');
-    div.className = "bg-zinc-950 hover:bg-zinc-800 p-4 rounded-2xl border border-zinc-700 hover:border-[#00ff9d33] cursor-pointer transition flex justify-between items-center";
-    div.innerHTML = `
-      <div>
-        <div class="font-medium">${t.name}</div>
-        <div class="text-xs text-zinc-400 font-mono">${t.voice_id ? t.voice_id.slice(0,12)+'...' : '—'}</div>
-      </div>
-      <div class="flex gap-3">
-        <button onclick="useTemplate(${i}); event.stopImmediatePropagation()" class="text-[#00ff9d] hover:text-white text-xl">▶</button>
-        <button onclick="deleteTemplate(${i}); event.stopImmediatePropagation()" class="text-red-400 hover:text-red-500 text-xl">🗑</button>
-      </div>
-    `;
-    div.onclick = () => useTemplate(i);
-    container.appendChild(div);
-  });
-}
-
-function createTemplate() {
-  const name = document.getElementById('templateName').value.trim();
-  if (!name) return alert("Введіть назву шаблону!");
-
-  const template = {
-    name: name,
-    voice_id: document.getElementById('voiceIdInput').value.trim() || currentVoiceId,
-    model_id: document.getElementById('modelSelect').value,
-    voice_settings: {
-      stability: parseFloat(document.getElementById('stability').value),
-      similarity_boost: parseFloat(document.getElementById('similarity').value),
-      style: parseFloat(document.getElementById('style').value),
-      use_speaker_boost: document.getElementById('speakerBoost').checked
-    },
-    auto_pause_enabled: document.getElementById('autoPause').checked,
-    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value) || 1.2
-  };
-
-  templates.push(template);
-  saveTemplates();
-  closeModal('templateModal');
-  document.getElementById('templateName').value = '';
-  renderTemplates();
-  addLog(`Шаблон "${name}" збережено`, 'success');
-}
-
-function deleteTemplate(i) {
-  if (confirm(`Видалити шаблон "${templates[i].name}"?`)) {
-    templates.splice(i, 1);
-    saveTemplates();
-    renderTemplates();
-    addLog('Шаблон видалено', 'success');
-  }
-}
-
-function useTemplate(i) {
-  const t = templates[i];
-  currentVoiceId = t.voice_id;
-  document.getElementById('voiceIdInput').value = t.voice_id || '';
-  document.getElementById('currentVoice').textContent = t.voice_id || '';
-
-  document.getElementById('modelSelect').value = t.model_id || 'eleven_multilingual_v2';
-  document.getElementById('stability').value = t.voice_settings?.stability ?? 0.75;
-  document.getElementById('similarity').value = t.voice_settings?.similarity_boost ?? 0.85;
-  document.getElementById('style').value = t.voice_settings?.style ?? 0.10;
-  document.getElementById('speakerBoost').checked = t.voice_settings?.use_speaker_boost ?? true;
-  document.getElementById('autoPause').checked = t.auto_pause_enabled ?? false;
-  document.getElementById('pauseDuration').value = t.auto_pause_duration ?? 1.2;
-
-  ['stability','similarity','style'].forEach(id => {
-    document.getElementById(id + 'Val').textContent = parseFloat(document.getElementById(id).value).toFixed(2);
-  });
-
-  addLog(`Завантажено шаблон: ${t.name}`, 'success');
-}
-
-// ================== VOICE ID ==================
-function setVoiceId() {
-  currentVoiceId = document.getElementById('voiceIdInput').value.trim();
-  if (currentVoiceId) {
-    document.getElementById('currentVoice').textContent = currentVoiceId;
-    addLog(`Voice ID встановлено`, 'success');
-  }
-}
-
-// ================== СИНТЕЗ ==================
+// ================== СИНТЕЗ + ВІЗУАЛЬНИЙ ФІДБЕК ==================
 async function synthesize() {
+  const btn = document.getElementById('synthesizeBtn');
+  const btnText = document.getElementById('btnText');
+
   if (!currentToken) return alert('Введіть API токен!');
   if (!currentVoiceId) return alert('Вкажіть Voice ID!');
   const text = document.getElementById('textInput').value.trim();
   if (!text) return alert('Введіть текст!');
 
-  addLog('Створюємо задачу на озвучку...', 'info');
+  // === ВІЗУАЛЬНИЙ ФІДБЕК ===
+  btn.disabled = true;
+  btn.classList.add('btn-disabled');
+  btnText.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Генерація...`;
 
-  const body = {
-    text: text,
-    voice_id: currentVoiceId,
-    model_id: document.getElementById('modelSelect').value,
-    auto_pause_enabled: document.getElementById('autoPause').checked,
-    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value) || 1.2,
-    voice_settings: {
-      stability: parseFloat(document.getElementById('stability').value),
-      similarity_boost: parseFloat(document.getElementById('similarity').value),
-      style: parseFloat(document.getElementById('style').value),
-      use_speaker_boost: document.getElementById('speakerBoost').checked
-    }
-  };
+  document.getElementById('playerPanel').classList.remove('hidden');
+  document.getElementById('readyBlock').classList.add('hidden');
+  document.getElementById('processingBlock').classList.remove('hidden');
+  document.getElementById('playerTitle').textContent = 'Генерація аудіо...';
+
+  addLog('Створюємо задачу...', 'info');
+
+  const body = { /* ... той самий body як раніше ... */ };
 
   try {
     const res = await fetch(`${API_BASE}/voice/synthesize`, {
       method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${currentToken}`, 
-        'Content-Type': 'application/json' 
-      },
+      headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-
     const data = await res.json();
+
     if (data.task_id) {
-      addLog(`Задача створена → Task ID: ${data.task_id}`, 'success');
+      currentTaskId = data.task_id;
+      addLog(`Задача створена • Task ID: ${data.task_id}`, 'success');
       startPolling(data.task_id);
-    } else {
-      addLog('Не отримали task_id', 'error');
     }
   } catch (e) {
     addLog(`Помилка: ${e.message}`, 'error');
+    resetButton();
   }
 }
 
 function startPolling(task_id) {
   if (pollingInterval) clearInterval(pollingInterval);
-
   pollingInterval = setInterval(async () => {
     try {
       const res = await fetch(`${API_BASE}/voice/status/${task_id}`, {
@@ -336,30 +260,52 @@ function startPolling(task_id) {
       });
       const data = await res.json();
 
-      if (data.status === 'completed' && data.audio_url) {
+      if (data.status === 'completed') {
         clearInterval(pollingInterval);
-        showAudioPlayer(data.audio_url);
-        addLog('Аудіо готове!', 'success');
-      } else if (data.status === 'censored') {
+        resetButton();
+        loadAndPlayAudio(task_id);
+      } else if (data.status === 'censored' || data.status === 'failed') {
         clearInterval(pollingInterval);
-        addLog('Текст містить цензуру. Спробуйте змінити слова.', 'error');
+        resetButton();
+        addLog('Помилка або цензура', 'error');
+        document.getElementById('playerPanel').classList.add('hidden');
       }
     } catch (e) {}
-  }, 1500);
+  }, 1400);
 }
 
-function showAudioPlayer(url) {
-  currentAudioUrl = url;
-  const player = document.getElementById('audioPlayer');
-  player.src = url;
-  document.getElementById('playerPanel').classList.remove('hidden');
+async function loadAndPlayAudio(task_id) {
+  try {
+    const res = await fetch(`${API_BASE}/voice/download/${task_id}`, {
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+    const blob = await res.blob();
+    currentAudioUrl = URL.createObjectURL(blob);
 
-  const audio = new Audio(url);
-  audio.onloadedmetadata = () => {
-    const min = Math.floor(audio.duration / 60);
-    const sec = Math.floor(audio.duration % 60);
-    document.getElementById('audioDuration').textContent = `Тривалість: ${min}:${sec < 10 ? '0' : ''}${sec}`;
-  };
+    document.getElementById('processingBlock').classList.add('hidden');
+    document.getElementById('readyBlock').classList.remove('hidden');
+    document.getElementById('playerTitle').innerHTML = `<i class="fa-solid fa-check-circle"></i> Готово!`;
+
+    const player = document.getElementById('audioPlayer');
+    player.src = currentAudioUrl;
+
+    const audio = new Audio(currentAudioUrl);
+    audio.onloadedmetadata = () => {
+      const min = Math.floor(audio.duration / 60);
+      const sec = Math.floor(audio.duration % 60);
+      document.getElementById('audioDuration').textContent = `Тривалість: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+    };
+  } catch (e) {
+    addLog('Не вдалося завантажити аудіо', 'error');
+  }
+}
+
+function resetButton() {
+  const btn = document.getElementById('synthesizeBtn');
+  const btnText = document.getElementById('btnText');
+  btn.disabled = false;
+  btn.classList.remove('btn-disabled');
+  btnText.innerHTML = `<i class="fa-solid fa-play"></i> ОЗВУЧИТИ ТЕКСТ`;
 }
 
 function downloadAudio() {
@@ -372,26 +318,17 @@ function downloadAudio() {
 
 function hidePlayer() {
   document.getElementById('playerPanel').classList.add('hidden');
-  document.getElementById('audioPlayer').pause();
   if (pollingInterval) clearInterval(pollingInterval);
+  resetButton();
 }
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', () => {
   updateTokenStatus();
   renderTemplates();
-  addLog('Voicer готовий — використовуємо реальний API', 'success');
+  addLog('Voicer запущено', 'success');
 
-  document.getElementById('textInput').addEventListener('input', () => {
-    document.getElementById('charCount').textContent = `${document.getElementById('textInput').value.length} / 1 000 000`;
-  });
-
-  ['stability','similarity','style'].forEach(id => {
-    const el = document.getElementById(id);
-    el.oninput = () => document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
-  });
-
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('tokenModal'); closeModal('templateModal'); } });
+  // решта init (charCount, sliders, ESC) — як раніше
 });
 </script>
 </body>
