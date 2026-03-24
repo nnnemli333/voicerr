@@ -7,10 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { 
-      font-family: 'Segoe UI', system-ui, sans-serif; 
-      background: #0a0a0a;
-    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; }
     .hacker-green { color: #00ff9d; }
     .accent-hacker { accent-color: #00ff9d; }
     .btn-hacker {
@@ -40,29 +37,27 @@
       <i class="fa-solid fa-waveform text-4xl hacker-green"></i>
       <h1 class="text-3xl font-bold tracking-tight text-white">Voicer</h1>
     </div>
-    <div onclick="showTokenModal()" 
-         class="cursor-pointer flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-2xl border border-[#00ff9d33] transition">
+    <div onclick="showTokenModal()" class="cursor-pointer flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-2xl border border-[#00ff9d33] transition">
       <i class="fa-solid fa-key hacker-green"></i>
       <span id="tokenStatus" class="font-medium">API токен</span>
     </div>
   </div>
 
   <div class="grid grid-cols-12 gap-6">
-    <!-- ЛІВА: ШАБЛОНИ -->
+    <!-- ШАБЛОНИ -->
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33]">
       <div class="flex justify-between items-center mb-5">
         <h2 class="font-semibold text-lg flex items-center gap-2 hacker-green">
           <i class="fa-solid fa-bookmark"></i> Мої шаблони
         </h2>
-        <button onclick="showCreateTemplateModal()" 
-                class="hacker-green hover:text-white flex items-center gap-1 text-sm transition">
+        <button onclick="showCreateTemplateModal()" class="hacker-green hover:text-white flex items-center gap-1 text-sm">
           <i class="fa-solid fa-plus"></i> Новий
         </button>
       </div>
       <div id="templatesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
     </div>
 
-    <!-- ЦЕНТР: ТЕКСТ -->
+    <!-- ТЕКСТ -->
     <div class="col-span-12 lg:col-span-6">
       <div class="bg-zinc-900 rounded-3xl p-7 border border-[#00ff9d33]">
         <div class="flex justify-between mb-4 text-sm">
@@ -80,7 +75,7 @@
       </button>
     </div>
 
-    <!-- ПРАВА: НАЛАШТУВАННЯ -->
+    <!-- НАЛАШТУВАННЯ -->
     <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 space-y-6 border border-[#00ff9d33]">
       <h2 class="font-semibold text-lg mb-2 hacker-green">Налаштування</h2>
       
@@ -119,8 +114,7 @@
             <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-hacker">
             Авто-паузи
           </label>
-          <input id="pauseDuration" type="number" value="1.2" step="0.1" 
-                 class="w-20 bg-zinc-950 border border-zinc-700 rounded-3xl px-4 py-2 text-center">
+          <input id="pauseDuration" type="number" value="1.2" step="0.1" class="w-20 bg-zinc-950 border border-zinc-700 rounded-3xl px-4 py-2 text-center">
           <span class="text-xs text-zinc-400">сек</span>
         </div>
       </div>
@@ -140,44 +134,29 @@
   <!-- LOG -->
   <div class="mt-8 bg-zinc-900 rounded-3xl p-6 border border-[#00ff9d33]">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="font-medium hacker-green flex items-center gap-2">
-        <i class="fa-solid fa-terminal"></i> ЛОГ
-      </h3>
+      <h3 class="font-medium hacker-green flex items-center gap-2"><i class="fa-solid fa-terminal"></i> ЛОГ</h3>
       <button onclick="clearLogs()" class="text-xs text-zinc-400 hover:text-red-400">очистити</button>
     </div>
     <div id="logContainer" class="h-56 overflow-y-auto bg-black/70 rounded-2xl p-5 text-xs hacker-green log-line space-y-1"></div>
   </div>
 </div>
 
-<!-- ====================== MODALS ====================== -->
-
-<!-- Token Modal -->
+<!-- MODALS -->
 <div id="tokenModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
   <div class="modal bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-[#00ff9d33] relative">
-    <!-- Хрестик -->
-    <button onclick="closeModal('tokenModal')" 
-            class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white transition">×</button>
-    
+    <button onclick="closeModal('tokenModal')" class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white">×</button>
     <h3 class="text-xl font-semibold mb-6 hacker-green">API токен</h3>
-    <input id="tokenInput" type="password" placeholder="sk_..." 
-           class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none">
-    <button onclick="saveToken()" 
-            class="mt-6 w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти</button>
+    <input id="tokenInput" type="password" placeholder="sk_..." class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none">
+    <button onclick="saveToken()" class="mt-6 w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти</button>
   </div>
 </div>
 
-<!-- Template Modal -->
 <div id="templateModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
   <div class="modal bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-[#00ff9d33] relative">
-    <!-- Хрестик -->
-    <button onclick="closeModal('templateModal')" 
-            class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white transition">×</button>
-    
+    <button onclick="closeModal('templateModal')" class="absolute top-4 right-4 text-3xl text-zinc-400 hover:text-white">×</button>
     <h3 class="text-xl font-semibold mb-6 hacker-green">Новий шаблон</h3>
-    <input id="templateName" placeholder="Назва шаблону" 
-           class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none mb-6">
-    <button onclick="createTemplate()" 
-            class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти шаблон</button>
+    <input id="templateName" placeholder="Назва шаблону" class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none mb-6">
+    <button onclick="createTemplate()" class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти шаблон</button>
   </div>
 </div>
 
@@ -189,11 +168,13 @@ let currentVoiceId = '';
 let templates = [];
 let logs = [];
 
-// Завантаження з localStorage
+// Безпечне завантаження даних
 try {
   currentToken = localStorage.getItem('voicerToken') || '';
   const saved = localStorage.getItem('voicerTemplates');
-  if (saved) templates = JSON.parse(saved);
+  if (saved) {
+    templates = JSON.parse(saved).filter(t => t && t.name && t.text); // захист від битих даних
+  }
 } catch (e) {
   console.warn('localStorage недоступний');
 }
@@ -245,23 +226,33 @@ function saveToken() {
   addLog('Токен збережено', 'success');
 }
 
-// ================== ШАБЛОНИ ==================
+// ================== ШАБЛОНИ (ВИПРАВЛЕНО) ==================
 function saveTemplates() {
-  try { localStorage.setItem('voicerTemplates', JSON.stringify(templates)); } catch(e){}
+  try {
+    localStorage.setItem('voicerTemplates', JSON.stringify(templates));
+  } catch(e){}
 }
 
 function renderTemplates() {
   const container = document.getElementById('templatesList');
-  container.innerHTML = templates.length === 0 
-    ? `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>` 
-    : '';
+  container.innerHTML = '';
+
+  if (templates.length === 0) {
+    container.innerHTML = `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>`;
+    return;
+  }
 
   templates.forEach((tmpl, i) => {
+    // Захист від битих шаблонів
+    if (!tmpl || !tmpl.name || !tmpl.text) return;
+
     const div = document.createElement('div');
     div.className = "bg-zinc-950 hover:bg-zinc-800 p-4 rounded-2xl border border-zinc-700 hover:border-[#00ff9d33] cursor-pointer transition";
     div.innerHTML = `
-      <div class="font-medium">${tmpl.name}</div>
-      <div class="text-xs text-zinc-400 line-clamp-2 mt-1">${tmpl.text.substring(0, 75)}${tmpl.text.length > 75 ? '...' : ''}</div>
+      <div class="font-medium text-white">${tmpl.name}</div>
+      <div class="text-xs text-zinc-400 line-clamp-2 mt-1">
+        ${tmpl.text.substring(0, 75)}${tmpl.text.length > 75 ? '...' : ''}
+      </div>
     `;
     div.onclick = () => useTemplate(i);
     container.appendChild(div);
@@ -296,6 +287,7 @@ function createTemplate() {
 }
 
 function useTemplate(i) {
+  if (!templates[i] || !templates[i].text) return;
   document.getElementById('textInput').value = templates[i].text;
   document.getElementById('charCount').textContent = `${templates[i].text.length} / 1 000 000`;
   addLog(`Завантажено шаблон: ${templates[i].name}`, 'success');
@@ -310,7 +302,7 @@ function setVoiceId() {
   }
 }
 
-// ================== СИНТЕЗ (заглушка) ==================
+// ================== СИНТЕЗ ==================
 async function synthesize() {
   if (!currentToken) return alert('Введіть API токен!');
   if (!currentVoiceId) return alert('Вкажіть Voice ID!');
@@ -318,32 +310,30 @@ async function synthesize() {
   if (!text) return alert('Введіть текст для озвучки!');
 
   addLog('Надсилаємо запит на синтез...', 'info');
-  // Тут буде твій fetch-код
+  // Тут додай свій fetch-код пізніше
 }
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', () => {
   updateTokenStatus();
   renderTemplates();
-  addLog('Voicer запущено — хакерський режим активовано', 'success');
+  addLog('Voicer запущено — хакерський режим', 'success');
 
-  // Лічильник символів
   document.getElementById('textInput').addEventListener('input', () => {
     const count = document.getElementById('textInput').value.length;
     document.getElementById('charCount').textContent = `${count} / 1 000 000`;
   });
 
-  // Слайдери
   ['stability','similarity','style'].forEach(id => {
     const el = document.getElementById(id);
     el.oninput = () => document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
   });
 
-  // Закриття модалок по ESC
+  // ESC для закриття
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      document.getElementById('tokenModal').classList.add('hidden');
-      document.getElementById('templateModal').classList.add('hidden');
+      closeModal('tokenModal');
+      closeModal('templateModal');
     }
   });
 });
