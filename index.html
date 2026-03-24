@@ -1,105 +1,167 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voicer</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; }
+    .log-line { font-family: ui-monospace, monospace; }
+    .hacker-green { color: #00ff9d; }
+    .hacker-green-dark { color: #00cc7a; }
+    .accent-hacker { accent-color: #00ff9d; }
+    .border-hacker { border-color: #00ff9d33; }
+    .btn-hacker {
+      background: #00ff9d;
+      color: #000;
+      transition: all 0.2s;
+    }
+    .btn-hacker:hover {
+      background: #00cc7a;
+      box-shadow: 0 0 15px #00ff9d66;
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+<!-- ... (вся розмітка до </div> перед скриптом залишається така ж, як я давав раніше) ... -->
+
 <script>
-// ... (весь попередній код залишається, заміни тільки ці функції)
+// ================== ЗМІННІ ==================
+const API_BASE = "https://voicer.mat3u.com/api/v1";
+let currentToken = localStorage.getItem('voicerToken') || '';
+let currentVoiceId = '';
+let templates = JSON.parse(localStorage.getItem('voicerTemplates')) || [];
+let logs = [];
 
-function showCreateTemplateModal() {
-  const modal = document.getElementById('templateModal');
-  modal.classList.remove('hidden');
-  document.getElementById('templateName').focus();
-  
-  // Автозаповнення назви, якщо текст вже є
-  const currentText = document.getElementById('textInput').value.trim();
-  if (currentText.length > 10) {
-    document.getElementById('templateName').placeholder = "Наприклад: Новини, Оголошення, Книга...";
-  }
+// ================== LOG ==================
+function addLog(message, type = 'info') {
+  const time = new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  let color = type === 'error' ? 'text-red-400' : 'text-[#00ff9d]';
+  logs.push(`<span class="text-zinc-500">[${time}]</span> <span class="${color}">${message}</span>`);
+  if (logs.length > 50) logs.shift();
+  const logEl = document.getElementById('logContainer');
+  logEl.innerHTML = logs.join('<br>');
+  logEl.scrollTop = 999999;
 }
 
-function createTemplate() {
-  const nameInput = document.getElementById('templateName');
-  const name = nameInput.value.trim();
-  
-  if (!name) {
-    nameInput.classList.add('!border-red-500');
-    nameInput.placeholder = "Введіть назву шаблону!";
-    setTimeout(() => {
-      nameInput.classList.remove('!border-red-500');
-    }, 1500);
-    return;
-  }
-
-  const text = document.getElementById('textInput').value.trim();
-  
-  if (!text) {
-    addLog('Помилка: спочатку напишіть текст для озвучки', 'error');
-    alert('Спочатку введіть текст у головне поле!');
-    document.getElementById('templateModal').classList.add('hidden');
-    return;
-  }
-
-  // Створюємо шаблон
-  templates.unshift({ 
-    name: name, 
-    text: text,
-    date: new Date().toISOString()
-  });
-
-  localStorage.setItem('voicerTemplates', JSON.stringify(templates));
-  
-  // Закриваємо модалку
-  document.getElementById('templateModal').classList.add('hidden');
-  nameInput.value = '';
-
-  // Оновлюємо список
-  renderTemplates();
-  
-  addLog(`Шаблон "${name}" успішно створено`, 'success');
+function clearLogs() {
+  logs = [];
+  document.getElementById('logContainer').innerHTML = '';
+  addLog('Лог очищено', 'info');
 }
 
-function useTemplate(i) {
-  if (!templates[i]) return;
-  
-  document.getElementById('textInput').value = templates[i].text;
-  document.getElementById('charCount').textContent = 
-    `${templates[i].text.length} / 1 000 000`;
-  
-  addLog(`Завантажено шаблон: ${templates[i].name}`, 'success');
-  
-  // Прокручуємо до текстового поля
-  document.getElementById('textInput').scrollIntoView({ behavior: "smooth" });
+// ================== ТОКЕН ==================
+function updateTokenStatus() {
+  document.getElementById('tokenStatus').innerHTML = currentToken ? 
+    `<span class="hacker-green">✅ Підключено</span>` : `🔑 Токен`;
 }
 
-// ================== renderTemplates (оновлена, з датою) ==================
+function showTokenModal() { document.getElementById('tokenModal').classList.remove('hidden'); }
+function hideTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); }
+function saveToken() {
+  currentToken = document.getElementById('tokenInput').value.trim();
+  localStorage.setItem('voicerToken', currentToken);
+  hideTokenModal();
+  updateTokenStatus();
+  addLog('Токен збережено', 'success');
+}
+
+// ================== ШАБЛОНИ (ВИПРАВЛЕНО) ==================
 function renderTemplates() {
   const container = document.getElementById('templatesList');
-  container.innerHTML = '';
-
-  if (templates.length === 0) {
-    container.innerHTML = `
-      <div class="text-zinc-500 text-sm py-10 text-center border border-dashed border-zinc-700 rounded-2xl">
-        Ще немає шаблонів<br>
-        <span class="text-xs">Натисніть «Новий» щоб створити</span>
-      </div>`;
-    return;
-  }
+  container.innerHTML = templates.length === 0 
+    ? `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>`
+    : '';
 
   templates.forEach((tmpl, i) => {
     const div = document.createElement('div');
-    div.className = `group bg-zinc-950 hover:bg-zinc-900 border border-zinc-700 hover:border-[#00ff9d33] rounded-2xl p-4 cursor-pointer transition-all duration-200`;
-    
+    div.className = "bg-zinc-950 hover:bg-zinc-800 border border-zinc-700 hover:border-[#00ff9d33] rounded-2xl p-4 cursor-pointer transition flex justify-between items-center";
     div.innerHTML = `
-      <div class="flex justify-between items-start">
-        <div class="flex-1 min-w-0">
-          <div class="font-medium text-white group-hover:text-[#00ff9d] transition">${tmpl.name}</div>
-          <div class="text-xs text-zinc-500 mt-1 line-clamp-2">${tmpl.text.substring(0, 85)}${tmpl.text.length > 85 ? '...' : ''}</div>
-        </div>
-        <button onclick="event.stopImmediatePropagation(); useTemplate(${i});" 
-                class="ml-3 text-2xl text-[#00ff9d] opacity-60 hover:opacity-100 transition">▶</button>
+      <div class="flex-1 min-w-0">
+        <div class="font-medium text-white">${tmpl.name}</div>
+        <div class="text-xs text-zinc-500 truncate">${tmpl.text.substring(0, 65)}${tmpl.text.length > 65 ? '...' : ''}</div>
       </div>
+      <button onclick="useTemplate(${i}); event.stopImmediatePropagation()" 
+              class="text-[#00ff9d] hover:text-white text-2xl px-3 py-1">▶</button>
     `;
-    
     div.onclick = () => useTemplate(i);
     container.appendChild(div);
   });
 }
 
-// ... решта коду (synthesize, addLog тощо) залишається без змін
+function showCreateTemplateModal() {
+  document.getElementById('templateName').value = '';
+  document.getElementById('templateModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('templateName').focus(), 100);
+}
+
+function createTemplate() {
+  const nameInput = document.getElementById('templateName');
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    alert("Введіть назву шаблону!");
+    nameInput.focus();
+    return;
+  }
+
+  const text = document.getElementById('textInput').value.trim();
+
+  if (!text) {
+    alert("Спочатку напишіть текст у головне поле для озвучки!");
+    document.getElementById('templateModal').classList.add('hidden');
+    document.getElementById('textInput').focus();
+    return;
+  }
+
+  templates.push({ name, text });
+  localStorage.setItem('voicerTemplates', JSON.stringify(templates));
+
+  document.getElementById('templateModal').classList.add('hidden');
+  renderTemplates();
+
+  addLog(`Шаблон "${name}" успішно створено`, 'success');
+}
+
+function useTemplate(i) {
+  if (!templates[i]) return;
+  document.getElementById('textInput').value = templates[i].text;
+  document.getElementById('charCount').textContent = `${templates[i].text.length} / 1 000 000`;
+  addLog(`Завантажено шаблон: ${templates[i].name}`, 'success');
+}
+
+// ================== VOICE ID ==================
+function setVoiceId() {
+  currentVoiceId = document.getElementById('voiceIdInput').value.trim();
+  if (currentVoiceId) {
+    document.getElementById('currentVoice').textContent = currentVoiceId;
+    addLog(`Voice ID встановлено: ${currentVoiceId.slice(0,15)}...`, 'success');
+  }
+}
+
+// ================== СИНТЕЗ (без змін) ==================
+async function synthesize() { /* ... твій код synthesize залишається без змін ... */ }
+
+// ================== INIT ==================
+document.addEventListener('DOMContentLoaded', () => {
+  updateTokenStatus();
+  renderTemplates();
+  addLog('Voicer запущено — хакерський режим активовано', 'success');
+
+  document.getElementById('textInput').addEventListener('input', () => {
+    const count = document.getElementById('textInput').value.length;
+    document.getElementById('charCount').textContent = `${count} / 1 000 000`;
+  });
+
+  ['stability','similarity','style'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.oninput = () => {
+      document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
+    };
+  });
+});
 </script>
+</body>
+</html>
