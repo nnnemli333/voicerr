@@ -3,178 +3,191 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voicer</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Voicer | Terminal Access</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; }
-    .log-line { font-family: ui-monospace, monospace; }
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&display=swap');
+    
+    :root {
+      --hacker-green: #00ff41;
+      --hacker-dark-green: #003b00;
+      --terminal-bg: #050505;
+    }
+
+    body { 
+      font-family: 'Fira Code', monospace; 
+      background-color: var(--terminal-bg);
+    }
+
+    .border-hacker { border-color: var(--hacker-green); }
+    .text-hacker { color: var(--hacker-green); }
+    .bg-hacker { background-color: var(--hacker-green); }
+    
+    /* Скролбар */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--hacker-dark-green); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--hacker-green); }
+
+    input, textarea, select {
+        background: rgba(0, 0, 0, 0.8) !important;
+        border: 1px solid var(--hacker-dark-green) !important;
+        color: var(--hacker-green) !important;
+    }
+    input:focus, textarea:focus {
+        border-color: var(--hacker-green) !important;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+    }
+    
+    .glow-text {
+        text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+    }
   </style>
 </head>
-<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+<body class="text-emerald-500 min-h-screen">
 
 <div class="max-w-7xl mx-auto p-6">
 
-  <!-- HEADER -->
-  <div class="flex items-center justify-between mb-8 border-b border-zinc-800 pb-6">
+  <div class="flex items-center justify-between mb-8 border-b border-emerald-900/50 pb-6">
     <div class="flex items-center gap-4">
-      <i class="fa-solid fa-waveform text-4xl text-emerald-500"></i>
-      <h1 class="text-3xl font-bold tracking-tight text-white">Voicer</h1>
+      <i class="fa-solid fa-microchip text-4xl glow-text"></i>
+      <h1 class="text-3xl font-bold tracking-widest uppercase glow-text">Voicer_Terminal</h1>
     </div>
-    <div onclick="showTokenModal()" class="cursor-pointer flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-2xl border border-zinc-700 transition">
-      <i class="fa-solid fa-key text-emerald-400"></i>
-      <span id="tokenStatus" class="font-medium">API токен</span>
+    <div onclick="showTokenModal()" class="cursor-pointer flex items-center gap-3 bg-black border border-emerald-900 hover:border-emerald-500 px-6 py-3 rounded-md transition">
+      <i class="fa-solid fa-key"></i>
+      <span id="tokenStatus" class="text-xs uppercase tracking-tighter">ACCESS_TOKEN: NULL</span>
     </div>
   </div>
 
   <div class="grid grid-cols-12 gap-6">
 
-    <!-- ЛІВА: ШАБЛОНИ -->
-    <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6">
+    <div class="col-span-12 lg:col-span-3 bg-black/40 border border-emerald-900/30 rounded-lg p-6">
       <div class="flex justify-between items-center mb-5">
-        <h2 class="font-semibold text-lg flex items-center gap-2"><i class="fa-solid fa-bookmark text-emerald-400"></i> Мої шаблони</h2>
-        <button onclick="showCreateTemplateModal()" class="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1">
-          <i class="fa-solid fa-plus"></i> Новий
+        <h2 class="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-folder-open"></i> Presets
+        </h2>
+        <button onclick="showCreateTemplateModal()" class="hover:text-white text-xs border border-emerald-900 px-2 py-1 rounded">
+          [ ADD_NEW ]
         </button>
       </div>
-      <div id="templatesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+      <div id="templatesList" class="space-y-2 max-h-96 overflow-y-auto">
+          </div>
     </div>
 
-    <!-- ЦЕНТР: ТЕКСТ -->
     <div class="col-span-12 lg:col-span-6">
-      <div class="bg-zinc-900 rounded-3xl p-7">
-        <div class="flex justify-between mb-4 text-sm">
-          <span class="text-zinc-300">Текст для озвучки</span>
-          <span id="charCount" class="text-zinc-500">0 / 1 000 000</span>
+      <div class="bg-black/40 border border-emerald-900/30 rounded-lg p-6">
+        <div class="flex justify-between mb-4 text-[10px] uppercase">
+          <span>Input_Buffer</span>
+          <span id="charCount" class="opacity-50">0 / 1.000.000</span>
         </div>
         <textarea id="textInput" rows="11" 
-                  class="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-600 rounded-3xl p-6 outline-none text-base resize-none"
-                  placeholder="Вставте або напишіть текст..."></textarea>
+                  class="w-full rounded-md p-6 outline-none text-base resize-none"
+                  placeholder="Enter text to synthesize..."></textarea>
       </div>
 
       <button onclick="synthesize()" 
-              class="mt-6 w-full py-6 text-xl font-semibold bg-emerald-600 hover:bg-emerald-700 transition rounded-3xl flex items-center justify-center gap-3">
-        <i class="fa-solid fa-play"></i> ОЗВУЧИТИ ТЕКСТ
+              class="mt-6 w-full py-4 text-sm font-bold bg-emerald-950 border border-emerald-500 hover:bg-emerald-500 hover:text-black transition-all duration-300 rounded-md tracking-[0.2em]">
+        EXECUTE SYNTHESIS.EXE
       </button>
     </div>
 
-    <!-- ПРАВА: НАЛАШТУВАННЯ -->
-    <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 space-y-6">
-      <h2 class="font-semibold text-lg mb-2">Налаштування</h2>
+    <div class="col-span-12 lg:col-span-3 bg-black/40 border border-emerald-900/30 rounded-lg p-6 space-y-6">
+      <h2 class="font-bold text-sm uppercase tracking-widest mb-2">Parameters</h2>
 
       <div>
-        <label class="block text-xs text-zinc-400 mb-2">МОДЕЛЬ</label>
-        <select id="modelSelect" class="w-full bg-zinc-950 border border-zinc-700 rounded-3xl px-5 py-4 outline-none text-sm">
+        <label class="block text-[10px] opacity-60 mb-2">MODEL_ENGINE</label>
+        <select id="modelSelect" class="w-full rounded-md px-4 py-3 outline-none text-xs">
           <option value="eleven_multilingual_v2">Multilingual v2</option>
           <option value="eleven_turbo_v2_5">Turbo v2.5</option>
           <option value="eleven_flash_v2_5">Flash v2.5</option>
-          <option value="eleven_v3">v3</option>
+          <option value="eleven_v3">v3 (Stable)</option>
         </select>
       </div>
 
       <div class="space-y-5">
         <div>
-          <div class="flex justify-between text-xs mb-1"><span>Stability</span><span id="stabilityVal" class="text-emerald-400">0.75</span></div>
-          <input type="range" id="stability" min="0" max="1" step="0.01" value="0.75" class="w-full accent-emerald-500">
+          <div class="flex justify-between text-[10px] mb-1"><span>STABILITY</span><span id="stabilityVal">0.75</span></div>
+          <input type="range" id="stability" min="0" max="1" step="0.01" value="0.75" class="w-full accent-emerald-500 cursor-pointer">
         </div>
         <div>
-          <div class="flex justify-between text-xs mb-1"><span>Similarity</span><span id="similarityVal" class="text-emerald-400">0.85</span></div>
-          <input type="range" id="similarity" min="0" max="1" step="0.01" value="0.85" class="w-full accent-emerald-500">
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Style</span><span id="styleVal" class="text-emerald-400">0.10</span></div>
-          <input type="range" id="style" min="0" max="1" step="0.01" value="0.10" class="w-full accent-emerald-500">
+          <div class="flex justify-between text-[10px] mb-1"><span>SIMILARITY</span><span id="similarityVal">0.85</span></div>
+          <input type="range" id="similarity" min="0" max="1" step="0.01" value="0.85" class="w-full accent-emerald-500 cursor-pointer">
         </div>
       </div>
 
-      <div class="pt-4 border-t border-zinc-700 flex flex-col gap-4 text-sm">
-        <label class="flex items-center gap-3">
-          <input type="checkbox" id="speakerBoost" checked class="w-5 h-5 accent-emerald-500">
-          Speaker Boost
+      <div class="pt-4 border-t border-emerald-900/50 flex flex-col gap-4 text-[11px]">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" id="autoPause" checked class="accent-emerald-500">
+          AUTO_PAUSE_LOGIC
         </label>
-        <div class="flex items-center gap-4">
-          <label class="flex items-center gap-3">
-            <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-emerald-500">
-            Авто-паузи
-          </label>
-          <input id="pauseDuration" type="number" value="1.2" step="0.1" class="w-20 bg-zinc-950 border border-zinc-700 rounded-3xl px-4 py-2 text-center">
-          <span class="text-xs text-zinc-400">сек</span>
+        <div class="flex items-center gap-2">
+            <input id="pauseDuration" type="number" value="1.2" step="0.1" class="w-16 px-2 py-1 text-center">
+            <span class="opacity-50 italic">ms_delay</span>
         </div>
       </div>
 
-      <!-- CUSTOM VOICE -->
-      <div class="pt-6 border-t border-zinc-700">
-        <p class="text-xs text-zinc-400 mb-2">VOICE ID</p>
-        <div class="flex gap-2">
-          <input id="voiceIdInput" type="text" placeholder="Встав voice_id сюди" 
-                 class="flex-1 bg-zinc-950 border border-zinc-700 rounded-3xl px-5 py-4 text-sm outline-none">
-          <button onclick="setVoiceId()" class="bg-emerald-600 hover:bg-emerald-700 px-6 rounded-3xl text-sm">OK</button>
-        </div>
-        <div id="currentVoice" class="mt-3 text-xs text-emerald-400 font-mono break-all"></div>
+      <div class="pt-6 border-t border-emerald-900/50">
+        <p class="text-[10px] opacity-60 mb-2">VOICE_IDENTITY_HEX</p>
+        <input id="voiceIdInput" type="text" placeholder="ID..." 
+               class="w-full px-4 py-3 text-xs outline-none rounded-md mb-2">
+        <div id="currentVoice" class="text-[9px] opacity-50 break-all font-mono"></div>
       </div>
     </div>
   </div>
 
-  <!-- LOG PANEL -->
-  <div class="mt-8 bg-zinc-900 rounded-3xl p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-medium text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-terminal"></i> ЛОГ</h3>
-      <button onclick="clearLogs()" class="text-xs text-zinc-400 hover:text-red-400">очистити</button>
+  <div class="mt-8 bg-black border border-emerald-900/30 rounded-lg p-4">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-xs font-bold tracking-widest opacity-80 underline underline-offset-4">SYSTEM_LOG</h3>
+      <button onclick="clearLogs()" class="text-[9px] hover:text-white opacity-40">[ PURGE_LOGS ]</button>
     </div>
-    <div id="logContainer" class="h-56 overflow-y-auto bg-black/50 rounded-2xl p-5 text-xs text-emerald-300/90 log-line space-y-1"></div>
+    <div id="logContainer" class="h-40 overflow-y-auto bg-black rounded p-3 text-[11px] leading-relaxed space-y-1"></div>
   </div>
 </div>
 
-<!-- MODALS -->
-<div id="tokenModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-  <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md">
-    <h3 class="text-xl font-semibold mb-6">API токен</h3>
-    <input id="tokenInput" type="password" placeholder="sk_..." class="w-full bg-zinc-950 border border-zinc-700 rounded-3xl px-6 py-5 outline-none">
-    <button onclick="saveToken()" class="mt-6 w-full py-5 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-medium">Зберегти</button>
+<div id="tokenModal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-black border border-emerald-500 rounded-lg p-8 w-full max-w-md shadow-[0_0_30px_rgba(0,255,65,0.1)]">
+    <h3 class="text-sm font-bold uppercase mb-6 tracking-widest">Master Key Required</h3>
+    <input id="tokenInput" type="password" placeholder="Enter API Key..." class="w-full px-6 py-4 outline-none rounded-md">
+    <button onclick="saveToken()" class="mt-6 w-full py-4 bg-emerald-900 hover:bg-emerald-500 hover:text-black border border-emerald-500 transition-all font-bold">AUTHORIZE</button>
+    <button onclick="hideTokenModal()" class="mt-2 w-full py-2 text-[10px] opacity-50">CANCEL</button>
   </div>
 </div>
 
-<div id="templateModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-  <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md">
-    <h3 class="text-xl font-semibold mb-6">Новий шаблон</h3>
-    <input id="templateName" placeholder="Назва шаблону" class="w-full bg-zinc-950 border border-zinc-700 rounded-3xl px-6 py-5 outline-none mb-6">
-    <button onclick="createTemplate()" class="w-full py-5 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-medium">Зберегти шаблон</button>
+<div id="templateModal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-black border border-emerald-500 rounded-lg p-8 w-full max-w-md">
+    <h3 class="text-sm font-bold uppercase mb-6 tracking-widest">Define New Preset</h3>
+    <input id="templateName" placeholder="Preset Name..." class="w-full px-6 py-4 outline-none rounded-md mb-6">
+    <button onclick="createTemplate()" class="w-full py-4 bg-emerald-900 hover:bg-emerald-500 hover:text-black border border-emerald-500 transition-all font-bold">STORE_DATA</button>
+    <button onclick="hideTemplateModal()" class="mt-2 w-full py-2 text-[10px] opacity-50">ABORT</button>
   </div>
 </div>
 
 <script>
-// ================== ЗМІННІ ==================
+// Logic
 const API_BASE = "https://voicer.mat3u.com/api/v1";
 let currentToken = localStorage.getItem('voicerToken') || '';
-let currentVoiceId = '';
 let templates = JSON.parse(localStorage.getItem('voicerTemplates')) || [];
 let logs = [];
 
-// ================== LOG SYSTEM ==================
 function addLog(message, type = 'info') {
-  const time = new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  let color = 'text-emerald-300';
-  if (type === 'error') color = 'text-red-400';
-  if (type === 'success') color = 'text-emerald-400';
-
-  logs.push(`<span class="text-zinc-500">[${time}]</span> <span class="${color}">${message}</span>`);
-  if (logs.length > 50) logs.shift();
-
-  document.getElementById('logContainer').innerHTML = logs.join('<br>');
-  document.getElementById('logContainer').scrollTop = 999999;
+  const time = new Date().toLocaleTimeString('uk-UA', {hour12: false});
+  const color = type === 'error' ? 'text-red-500' : (type === 'success' ? 'text-white' : 'text-emerald-500/80');
+  const prefix = type === 'error' ? '[!] ERROR:' : '>>>';
+  
+  logs.push(`<div><span class="opacity-30">${time}</span> <span class="${color}">${prefix} ${message}</span></div>`);
+  if (logs.length > 100) logs.shift();
+  const container = document.getElementById('logContainer');
+  container.innerHTML = logs.join('');
+  container.scrollTop = container.scrollHeight;
 }
 
-function clearLogs() {
-  logs = [];
-  document.getElementById('logContainer').innerHTML = '';
-  addLog('Лог очищено', 'info');
-}
+function clearLogs() { logs = []; document.getElementById('logContainer').innerHTML = ''; addLog('Log system reset.'); }
 
-// ================== ІНШІ ФУНКЦІЇ (токен, шаблони, синтез) ==================
+// Token
 function updateTokenStatus() {
-  document.getElementById('tokenStatus').innerHTML = currentToken ? `✅ Підключено` : `🔑 Токен`;
+  document.getElementById('tokenStatus').innerHTML = currentToken ? `SECURED: ${currentToken.slice(0,6)}...` : `ACCESS_TOKEN: NULL`;
 }
-
 function showTokenModal() { document.getElementById('tokenModal').classList.remove('hidden'); }
 function hideTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); }
 function saveToken() {
@@ -182,45 +195,87 @@ function saveToken() {
   localStorage.setItem('voicerToken', currentToken);
   hideTokenModal();
   updateTokenStatus();
-  addLog('Токен збережено', 'success');
+  addLog('Master key accepted. Session encrypted.', 'success');
 }
 
-// Шаблони (скорочено)
-function renderTemplates() { /* ... */ }
-function showCreateTemplateModal() { /* ... */ }
-function createTemplate() { /* ... */ }
-function useTemplate(i) { /* ... */ }
+// Шаблони (ТЕПЕР ПРАЦЮЮТЬ)
+function showCreateTemplateModal() { document.getElementById('templateModal').classList.remove('hidden'); }
+function hideTemplateModal() { document.getElementById('templateModal').classList.add('hidden'); }
 
-// Voice ID
-function setVoiceId() {
-  currentVoiceId = document.getElementById('voiceIdInput').value.trim();
-  if (currentVoiceId) {
-    document.getElementById('currentVoice').textContent = currentVoiceId;
-    addLog(`Voice ID встановлено: ${currentVoiceId.slice(0,12)}...`, 'success');
+function createTemplate() {
+  const name = document.getElementById('templateName').value.trim();
+  if (!name) return;
+  
+  const preset = {
+    name,
+    voice_id: document.getElementById('voiceIdInput').value,
+    model_id: document.getElementById('modelSelect').value,
+    stability: document.getElementById('stability').value,
+    similarity: document.getElementById('similarity').value
+  };
+  
+  templates.push(preset);
+  localStorage.setItem('voicerTemplates', JSON.stringify(templates));
+  renderTemplates();
+  hideTemplateModal();
+  document.getElementById('templateName').value = '';
+  addLog(`New preset [${name}] stored in local database.`, 'success');
+}
+
+function renderTemplates() {
+  const list = document.getElementById('templatesList');
+  if (templates.length === 0) {
+      list.innerHTML = '<div class="text-[10px] opacity-30 italic px-2">No presets found...</div>';
+      return;
   }
+  list.innerHTML = templates.map((t, i) => `
+    <div class="group flex items-center justify-between bg-emerald-950/20 border border-emerald-900/50 p-3 rounded hover:border-emerald-500 transition-colors cursor-pointer">
+      <div onclick="useTemplate(${i})" class="flex-1">
+        <div class="text-[11px] font-bold uppercase">${t.name}</div>
+        <div class="text-[9px] opacity-40">${t.voice_id.slice(0,10)}...</div>
+      </div>
+      <button onclick="deleteTemplate(${i})" class="text-red-900 hover:text-red-500 px-2 opacity-0 group-hover:opacity-100">×</button>
+    </div>
+  `).join('');
 }
 
-// Синтез (з логами)
+function useTemplate(i) {
+  const t = templates[i];
+  document.getElementById('voiceIdInput').value = t.voice_id;
+  document.getElementById('modelSelect').value = t.model_id;
+  document.getElementById('stability').value = t.stability;
+  document.getElementById('similarity').value = t.similarity;
+  // Update displays
+  document.getElementById('stabilityVal').textContent = t.stability;
+  document.getElementById('similarityVal').textContent = t.similarity;
+  addLog(`Preset [${t.name}] injected into system.`);
+}
+
+function deleteTemplate(i) {
+    templates.splice(i, 1);
+    localStorage.setItem('voicerTemplates', JSON.stringify(templates));
+    renderTemplates();
+}
+
+// Synthesis
 async function synthesize() {
-  if (!currentToken) { addLog('Помилка: введіть API токен', 'error'); return alert('Введіть токен!'); }
-  if (!currentVoiceId) { addLog('Помилка: вкажіть Voice ID', 'error'); return alert('Вкажіть Voice ID!'); }
-
+  if (!currentToken) { addLog('Authorization failed: No key.', 'error'); return showTokenModal(); }
   const text = document.getElementById('textInput').value.trim();
-  if (!text) { addLog('Помилка: порожній текст', 'error'); return; }
+  const vId = document.getElementById('voiceIdInput').value.trim();
+  
+  if (!text || !vId) { addLog('Validation error: Missing buffer or ID.', 'error'); return; }
 
-  addLog('Надсилаємо запит на синтез...', 'info');
-
-  const body = {
+  addLog(`Initializing neural synthesis...`);
+  
+  const payload = {
     text,
-    voice_id: currentVoiceId,
+    voice_id: vId,
     model_id: document.getElementById('modelSelect').value,
     auto_pause_enabled: document.getElementById('autoPause').checked,
-    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value) || 1.2,
+    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value),
     voice_settings: {
       stability: parseFloat(document.getElementById('stability').value),
-      similarity_boost: parseFloat(document.getElementById('similarity').value),
-      style: parseFloat(document.getElementById('style').value),
-      use_speaker_boost: document.getElementById('speakerBoost').checked
+      similarity_boost: parseFloat(document.getElementById('similarity').value)
     }
   };
 
@@ -228,29 +283,32 @@ async function synthesize() {
     const res = await fetch(`${API_BASE}/voice/synthesize`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
-    addLog(`Задача створена. Task ID: ${data.task_id}`, 'success');
-    startPolling(data.task_id);
+    if (data.task_id) {
+        addLog(`Task dispatched. ID: ${data.task_id}`, 'success');
+        // Тут треба додати startPolling логіку
+    } else {
+        addLog(`System rejected request: ${JSON.stringify(data)}`, 'error');
+    }
   } catch (e) {
-    addLog(`Помилка запиту: ${e.message}`, 'error');
+    addLog(`Network protocol error: ${e.message}`, 'error');
   }
 }
 
-// (додай сюди решту функцій: startPolling, playAudio, downloadCurrent, hidePlayer — вони аналогічні попереднім версіям)
-
+// UI Init
 document.addEventListener('DOMContentLoaded', () => {
   updateTokenStatus();
   renderTemplates();
-  addLog('Додаток запущено', 'success');
+  addLog('VOICER_OS v4.0.1 initialized.');
+  addLog('Awaiting commands...');
 
-  // char counter + sliders update
-  document.getElementById('textInput').addEventListener('input', () => {
-    document.getElementById('charCount').textContent = `${document.getElementById('textInput').value.length} / 1 000 000`;
+  document.getElementById('textInput').addEventListener('input', (e) => {
+    document.getElementById('charCount').textContent = `${e.target.value.length} / 1.000.000`;
   });
 
-  ['stability','similarity','style'].forEach(id => {
+  ['stability','similarity'].forEach(id => {
     const el = document.getElementById(id);
     el.oninput = () => document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
   });
