@@ -1,370 +1,105 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voicer</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    body { 
-      font-family: 'Segoe UI', system-ui, sans-serif; 
-      background: #0a0a0a;
-    }
-    .log-line { 
-      font-family: ui-monospace, monospace; 
-    }
-    .hacker-green {
-      color: #00ff9d;
-    }
-    .hacker-green-dark {
-      color: #00cc7a;
-    }
-    .accent-hacker {
-      accent-color: #00ff9d;
-    }
-    .border-hacker {
-      border-color: #00ff9d33;
-    }
-    .btn-hacker {
-      background: #00ff9d;
-      color: #000;
-      transition: all 0.2s;
-    }
-    .btn-hacker:hover {
-      background: #00cc7a;
-      box-shadow: 0 0 15px #00ff9d66;
-    }
-  </style>
-</head>
-<body class="bg-zinc-950 text-zinc-200 min-h-screen">
-<div class="max-w-7xl mx-auto p-6">
-  <!-- HEADER -->
-  <div class="flex items-center justify-between mb-8 border-b border-zinc-800 pb-6">
-    <div class="flex items-center gap-4">
-      <i class="fa-solid fa-waveform text-4xl hacker-green"></i>
-      <h1 class="text-3xl font-bold tracking-tight text-white">Voicer</h1>
-    </div>
-    <div onclick="showTokenModal()" 
-         class="cursor-pointer flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-2xl border border-hacker transition">
-      <i class="fa-solid fa-key hacker-green"></i>
-      <span id="tokenStatus" class="font-medium">API токен</span>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-12 gap-6">
-    <!-- ЛІВА: ШАБЛОНИ -->
-    <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 border border-hacker">
-      <div class="flex justify-between items-center mb-5">
-        <h2 class="font-semibold text-lg flex items-center gap-2 hacker-green">
-          <i class="fa-solid fa-bookmark"></i> Мої шаблони
-        </h2>
-        <button onclick="showCreateTemplateModal()" 
-                class="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1 hover:scale-105 transition">
-          <i class="fa-solid fa-plus"></i> Новий
-        </button>
-      </div>
-      <div id="templatesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-    </div>
-
-    <!-- ЦЕНТР: ТЕКСТ -->
-    <div class="col-span-12 lg:col-span-6">
-      <div class="bg-zinc-900 rounded-3xl p-7 border border-hacker">
-        <div class="flex justify-between mb-4 text-sm">
-          <span class="text-zinc-300">Текст для озвучки</span>
-          <span id="charCount" class="text-zinc-500">0 / 1 000 000</span>
-        </div>
-        <textarea id="textInput" rows="11" 
-                  class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl p-6 outline-none text-base resize-none font-light"
-                  placeholder="Вставте або напишіть текст..."></textarea>
-      </div>
-      <button onclick="synthesize()" 
-              class="mt-6 w-full py-6 text-xl font-semibold btn-hacker rounded-3xl flex items-center justify-center gap-3 shadow-lg">
-        <i class="fa-solid fa-play"></i> ОЗВУЧИТИ ТЕКСТ
-      </button>
-    </div>
-
-    <!-- ПРАВА: НАЛАШТУВАННЯ -->
-    <div class="col-span-12 lg:col-span-3 bg-zinc-900 rounded-3xl p-6 space-y-6 border border-hacker">
-      <h2 class="font-semibold text-lg mb-2 hacker-green">Налаштування</h2>
-      
-      <div>
-        <label class="block text-xs text-zinc-400 mb-2">МОДЕЛЬ</label>
-        <select id="modelSelect" 
-                class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 outline-none text-sm">
-          <option value="eleven_multilingual_v2">Multilingual v2</option>
-          <option value="eleven_turbo_v2_5">Turbo v2.5</option>
-          <option value="eleven_flash_v2_5">Flash v2.5</option>
-          <option value="eleven_v3">v3</option>
-        </select>
-      </div>
-
-      <div class="space-y-5">
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Stability</span><span id="stabilityVal" class="hacker-green">0.75</span></div>
-          <input type="range" id="stability" min="0" max="1" step="0.01" value="0.75" class="w-full accent-hacker">
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Similarity</span><span id="similarityVal" class="hacker-green">0.85</span></div>
-          <input type="range" id="similarity" min="0" max="1" step="0.01" value="0.85" class="w-full accent-hacker">
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span>Style</span><span id="styleVal" class="hacker-green">0.10</span></div>
-          <input type="range" id="style" min="0" max="1" step="0.01" value="0.10" class="w-full accent-hacker">
-        </div>
-      </div>
-
-      <div class="pt-4 border-t border-zinc-700 flex flex-col gap-4 text-sm">
-        <label class="flex items-center gap-3">
-          <input type="checkbox" id="speakerBoost" checked class="w-5 h-5 accent-hacker">
-          Speaker Boost
-        </label>
-        <div class="flex items-center gap-4">
-          <label class="flex items-center gap-3">
-            <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-hacker">
-            Авто-паузи
-          </label>
-          <input id="pauseDuration" type="number" value="1.2" step="0.1" 
-                 class="w-20 bg-zinc-950 border border-zinc-700 rounded-3xl px-4 py-2 text-center">
-          <span class="text-xs text-zinc-400">сек</span>
-        </div>
-      </div>
-
-      <!-- CUSTOM VOICE -->
-      <div class="pt-6 border-t border-zinc-700">
-        <p class="text-xs text-zinc-400 mb-2">VOICE ID</p>
-        <div class="flex gap-2">
-          <input id="voiceIdInput" type="text" placeholder="Встав voice_id сюди" 
-                 class="flex-1 bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-5 py-4 text-sm outline-none">
-          <button onclick="setVoiceId()" 
-                  class="bg-[#00ff9d] hover:bg-[#00cc7a] text-black px-6 rounded-3xl text-sm font-medium">OK</button>
-        </div>
-        <div id="currentVoice" class="mt-3 text-xs hacker-green font-mono break-all"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LOG PANEL -->
-  <div class="mt-8 bg-zinc-900 rounded-3xl p-6 border border-hacker">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-medium hacker-green flex items-center gap-2">
-        <i class="fa-solid fa-terminal"></i> ЛОГ
-      </h3>
-      <button onclick="clearLogs()" class="text-xs text-zinc-400 hover:text-red-400">очистити</button>
-    </div>
-    <div id="logContainer" class="h-56 overflow-y-auto bg-black/70 rounded-2xl p-5 text-xs hacker-green-dark log-line space-y-1"></div>
-  </div>
-</div>
-
-<!-- MODALS -->
-<div id="tokenModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-  <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-hacker">
-    <h3 class="text-xl font-semibold mb-6 hacker-green">API токен</h3>
-    <input id="tokenInput" type="password" placeholder="sk_..." 
-           class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none">
-    <button onclick="saveToken()" 
-            class="mt-6 w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти</button>
-  </div>
-</div>
-
-<div id="templateModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-  <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md border border-hacker">
-    <h3 class="text-xl font-semibold mb-6 hacker-green">Новий шаблон</h3>
-    <input id="templateName" placeholder="Назва шаблону" 
-           class="w-full bg-zinc-950 border border-zinc-700 focus:border-[#00ff9d] rounded-3xl px-6 py-5 outline-none mb-6">
-    <button onclick="createTemplate()" 
-            class="w-full py-5 btn-hacker rounded-3xl font-medium">Зберегти шаблон</button>
-  </div>
-</div>
-
 <script>
-// ================== ЗМІННІ ==================
-const API_BASE = "https://voicer.mat3u.com/api/v1";
-let currentToken = localStorage.getItem('voicerToken') || '';
-let currentVoiceId = '';
-let templates = JSON.parse(localStorage.getItem('voicerTemplates')) || [];
-let logs = [];
+// ... (весь попередній код залишається, заміни тільки ці функції)
 
-// ================== LOG SYSTEM ==================
-function addLog(message, type = 'info') {
-  const time = new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  let color = 'text-[#00ff9d]';
-  if (type === 'error') color = 'text-red-400';
-  if (type === 'success') color = 'text-[#00ff9d]';
+function showCreateTemplateModal() {
+  const modal = document.getElementById('templateModal');
+  modal.classList.remove('hidden');
+  document.getElementById('templateName').focus();
   
-  logs.push(`<span class="text-zinc-500">[${time}]</span> <span class="${color}">${message}</span>`);
-  if (logs.length > 50) logs.shift();
+  // Автозаповнення назви, якщо текст вже є
+  const currentText = document.getElementById('textInput').value.trim();
+  if (currentText.length > 10) {
+    document.getElementById('templateName').placeholder = "Наприклад: Новини, Оголошення, Книга...";
+  }
+}
+
+function createTemplate() {
+  const nameInput = document.getElementById('templateName');
+  const name = nameInput.value.trim();
   
-  const logEl = document.getElementById('logContainer');
-  logEl.innerHTML = logs.join('<br>');
-  logEl.scrollTop = 999999;
+  if (!name) {
+    nameInput.classList.add('!border-red-500');
+    nameInput.placeholder = "Введіть назву шаблону!";
+    setTimeout(() => {
+      nameInput.classList.remove('!border-red-500');
+    }, 1500);
+    return;
+  }
+
+  const text = document.getElementById('textInput').value.trim();
+  
+  if (!text) {
+    addLog('Помилка: спочатку напишіть текст для озвучки', 'error');
+    alert('Спочатку введіть текст у головне поле!');
+    document.getElementById('templateModal').classList.add('hidden');
+    return;
+  }
+
+  // Створюємо шаблон
+  templates.unshift({ 
+    name: name, 
+    text: text,
+    date: new Date().toISOString()
+  });
+
+  localStorage.setItem('voicerTemplates', JSON.stringify(templates));
+  
+  // Закриваємо модалку
+  document.getElementById('templateModal').classList.add('hidden');
+  nameInput.value = '';
+
+  // Оновлюємо список
+  renderTemplates();
+  
+  addLog(`Шаблон "${name}" успішно створено`, 'success');
 }
 
-function clearLogs() {
-  logs = [];
-  document.getElementById('logContainer').innerHTML = '';
-  addLog('Лог очищено', 'info');
+function useTemplate(i) {
+  if (!templates[i]) return;
+  
+  document.getElementById('textInput').value = templates[i].text;
+  document.getElementById('charCount').textContent = 
+    `${templates[i].text.length} / 1 000 000`;
+  
+  addLog(`Завантажено шаблон: ${templates[i].name}`, 'success');
+  
+  // Прокручуємо до текстового поля
+  document.getElementById('textInput').scrollIntoView({ behavior: "smooth" });
 }
 
-// ================== ТОКЕН ==================
-function updateTokenStatus() {
-  document.getElementById('tokenStatus').innerHTML = currentToken ? 
-    `<span class="hacker-green">✅ Підключено</span>` : `🔑 Токен`;
-}
-
-function showTokenModal() { 
-  document.getElementById('tokenModal').classList.remove('hidden'); 
-}
-function hideTokenModal() { 
-  document.getElementById('tokenModal').classList.add('hidden'); 
-}
-function saveToken() {
-  currentToken = document.getElementById('tokenInput').value.trim();
-  localStorage.setItem('voicerToken', currentToken);
-  hideTokenModal();
-  updateTokenStatus();
-  addLog('Токен збережено', 'success');
-}
-
-// ================== ШАБЛОНИ (виправлено) ==================
+// ================== renderTemplates (оновлена, з датою) ==================
 function renderTemplates() {
   const container = document.getElementById('templatesList');
   container.innerHTML = '';
-  
+
   if (templates.length === 0) {
-    container.innerHTML = `<div class="text-zinc-500 text-sm py-8 text-center">Ще немає шаблонів</div>`;
+    container.innerHTML = `
+      <div class="text-zinc-500 text-sm py-10 text-center border border-dashed border-zinc-700 rounded-2xl">
+        Ще немає шаблонів<br>
+        <span class="text-xs">Натисніть «Новий» щоб створити</span>
+      </div>`;
     return;
   }
-  
+
   templates.forEach((tmpl, i) => {
     const div = document.createElement('div');
-    div.className = "bg-zinc-950 hover:bg-zinc-800 border border-zinc-700 hover:border-[#00ff9d33] rounded-2xl p-4 cursor-pointer transition flex justify-between items-center";
+    div.className = `group bg-zinc-950 hover:bg-zinc-900 border border-zinc-700 hover:border-[#00ff9d33] rounded-2xl p-4 cursor-pointer transition-all duration-200`;
+    
     div.innerHTML = `
-      <div>
-        <div class="font-medium">${tmpl.name}</div>
-        <div class="text-xs text-zinc-500 truncate max-w-[180px]">${tmpl.text.substring(0, 60)}...</div>
+      <div class="flex justify-between items-start">
+        <div class="flex-1 min-w-0">
+          <div class="font-medium text-white group-hover:text-[#00ff9d] transition">${tmpl.name}</div>
+          <div class="text-xs text-zinc-500 mt-1 line-clamp-2">${tmpl.text.substring(0, 85)}${tmpl.text.length > 85 ? '...' : ''}</div>
+        </div>
+        <button onclick="event.stopImmediatePropagation(); useTemplate(${i});" 
+                class="ml-3 text-2xl text-[#00ff9d] opacity-60 hover:opacity-100 transition">▶</button>
       </div>
-      <button onclick="useTemplate(${i}); event.stopImmediatePropagation()" 
-              class="text-[#00ff9d] hover:text-white text-xl px-3">▶</button>
     `;
+    
     div.onclick = () => useTemplate(i);
     container.appendChild(div);
   });
 }
 
-function showCreateTemplateModal() {
-  document.getElementById('templateModal').classList.remove('hidden');
-  document.getElementById('templateName').focus();
-}
-
-function createTemplate() {
-  const name = document.getElementById('templateName').value.trim();
-  if (!name) {
-    alert("Введіть назву шаблону");
-    return;
-  }
-  
-  const text = document.getElementById('textInput').value.trim();
-  if (!text) {
-    alert("Спочатку введіть текст у поле");
-    return;
-  }
-  
-  templates.push({ name, text });
-  localStorage.setItem('voicerTemplates', JSON.stringify(templates));
-  
-  document.getElementById('templateModal').classList.add('hidden');
-  document.getElementById('templateName').value = '';
-  
-  renderTemplates();
-  addLog(`Шаблон "${name}" створено`, 'success');
-}
-
-function useTemplate(i) {
-  document.getElementById('textInput').value = templates[i].text;
-  document.getElementById('charCount').textContent = `${templates[i].text.length} / 1 000 000`;
-  addLog(`Шаблон "${templates[i].name}" завантажено`, 'success');
-}
-
-// ================== VOICE ID ==================
-function setVoiceId() {
-  currentVoiceId = document.getElementById('voiceIdInput').value.trim();
-  if (currentVoiceId) {
-    document.getElementById('currentVoice').textContent = currentVoiceId;
-    addLog(`Voice ID встановлено: ${currentVoiceId.slice(0,12)}...`, 'success');
-  }
-}
-
-// ================== СИНТЕЗ (без змін) ==================
-async function synthesize() {
-  if (!currentToken) { 
-    addLog('Помилка: введіть API токен', 'error'); 
-    return alert('Введіть токен!'); 
-  }
-  if (!currentVoiceId) { 
-    addLog('Помилка: вкажіть Voice ID', 'error'); 
-    return alert('Вкажіть Voice ID!'); 
-  }
-  
-  const text = document.getElementById('textInput').value.trim();
-  if (!text) { 
-    addLog('Помилка: порожній текст', 'error'); 
-    return; 
-  }
-
-  addLog('Надсилаємо запит на синтез...', 'info');
-
-  const body = {
-    text,
-    voice_id: currentVoiceId,
-    model_id: document.getElementById('modelSelect').value,
-    auto_pause_enabled: document.getElementById('autoPause').checked,
-    auto_pause_duration: parseFloat(document.getElementById('pauseDuration').value) || 1.2,
-    voice_settings: {
-      stability: parseFloat(document.getElementById('stability').value),
-      similarity_boost: parseFloat(document.getElementById('similarity').value),
-      style: parseFloat(document.getElementById('style').value),
-      use_speaker_boost: document.getElementById('speakerBoost').checked
-    }
-  };
-
-  try {
-    const res = await fetch(`${API_BASE}/voice/synthesize`, {
-      method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${currentToken}`, 
-        'Content-Type': 'application/json' 
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    addLog(`Задача створена. Task ID: ${data.task_id}`, 'success');
-    // startPolling(data.task_id);  // додай свою функцію полінгу тут
-  } catch (e) {
-    addLog(`Помилка запиту: ${e.message}`, 'error');
-  }
-}
-
-// ================== INIT ==================
-document.addEventListener('DOMContentLoaded', () => {
-  updateTokenStatus();
-  renderTemplates();
-  addLog('Voicer запущено — хакерський режим активовано', 'success');
-
-  // Лічильник символів
-  document.getElementById('textInput').addEventListener('input', () => {
-    const count = document.getElementById('textInput').value.length;
-    document.getElementById('charCount').textContent = `${count} / 1 000 000`;
-  });
-
-  // Оновлення значень слайдерів
-  ['stability','similarity','style'].forEach(id => {
-    const el = document.getElementById(id);
-    el.oninput = () => {
-      document.getElementById(id + 'Val').textContent = parseFloat(el.value).toFixed(2);
-    };
-  });
-});
+// ... решта коду (synthesize, addLog тощо) залишається без змін
 </script>
-</body>
-</html>
