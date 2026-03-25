@@ -6,9 +6,6 @@
   <title>Voicer — ElevenLabs v3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    body { font-family: 'Inter', system-ui, sans-serif; }
-  </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
 <div class="max-w-6xl mx-auto p-6">
@@ -17,7 +14,9 @@
       <i class="fa-solid fa-waveform text-4xl text-emerald-500"></i>
       <h1 class="text-3xl font-bold text-emerald-400">Voicer — ElevenLabs</h1>
     </div>
-    <div onclick="showTokenModal()" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-2xl cursor-pointer border border-zinc-700">
+    
+    <div onclick="showTokenModal()" id="tokenButton"
+         class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-2xl cursor-pointer border border-zinc-700">
       <i class="fa-solid fa-key"></i>
       <span id="tokenStatus" class="text-sm font-medium">API токен</span>
     </div>
@@ -37,7 +36,7 @@
       <div>
         <h2 class="text-xl font-semibold mb-3 text-emerald-400">Модель</h2>
         <select id="modelSelect" class="w-full bg-zinc-800 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-emerald-500">
-          <option value="eleven_v3">🌟 Eleven v3 (найновіша, найкраща якість)</option>
+          <option value="eleven_v3">🌟 Eleven v3 (найкраща)</option>
           <option value="eleven_multilingual_v2">🌍 Multilingual v2</option>
           <option value="eleven_turbo_v2_5">⚡ Turbo v2.5</option>
           <option value="eleven_flash_v2_5">⚡ Flash v2.5</option>
@@ -45,7 +44,7 @@
       </div>
     </div>
 
-    <!-- MAIN AREA -->
+    <!-- MAIN -->
     <div class="lg:col-span-6 space-y-6">
       <div class="bg-zinc-900 rounded-3xl p-6">
         <div class="flex justify-between mb-3">
@@ -59,11 +58,11 @@
 
       <div class="flex gap-4">
         <button onclick="synthesize()" 
-                class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 py-7 text-2xl font-semibold rounded-3xl transition-all">
+                class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 py-7 text-2xl font-semibold rounded-3xl">
           <i class="fa-solid fa-play mr-3"></i> ОЗВУЧИТИ
         </button>
         <button onclick="clearAll()" 
-                class="px-8 bg-zinc-800 hover:bg-red-900/50 rounded-3xl text-2xl transition-all">
+                class="px-8 bg-zinc-800 hover:bg-red-900/50 rounded-3xl text-2xl">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
@@ -71,16 +70,14 @@
       <div id="playerContainer" class="hidden bg-zinc-900 rounded-3xl p-6">
         <audio id="audioPlayer" controls class="w-full"></audio>
         <div class="flex gap-3 mt-5">
-          <button onclick="downloadCurrent()" 
-                  class="flex-1 bg-emerald-600 hover:bg-emerald-700 py-4 rounded-2xl flex items-center justify-center gap-2">
+          <button onclick="downloadCurrent()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 py-4 rounded-2xl flex items-center justify-center gap-2">
             <i class="fa-solid fa-download"></i> Завантажити MP3
           </button>
-          <button onclick="hidePlayer()" 
-                  class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl">Закрити</button>
+          <button onclick="hidePlayer()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl">Закрити</button>
         </div>
       </div>
 
-      <div id="status" class="text-center text-emerald-400 text-sm min-h-[30px]"></div>
+      <div id="status" class="text-center text-sm min-h-[30px]"></div>
     </div>
 
     <!-- RIGHT PANEL -->
@@ -89,12 +86,12 @@
       <div class="space-y-4">
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-emerald-500">
-          <span class="text-base">Увімкнути автоматичні паузи</span>
+          <span>Увімкнути автоматичні паузи</span>
         </label>
         <div class="flex items-center gap-3">
-          <span class="text-sm text-zinc-400">Тривалість паузи:</span>
-          <input id="pauseDuration" type="number" value="1.5" step="0.1" min="0.1" max="10"
-                 class="w-20 bg-zinc-800 rounded-xl px-4 py-2 text-center outline-none">
+          <span class="text-sm text-zinc-400">Тривалість:</span>
+          <input id="pauseDuration" type="number" value="1.5" step="0.1" min="0.1" 
+                 class="w-20 bg-zinc-800 rounded-xl px-4 py-2 text-center">
           <span class="text-sm text-zinc-400">сек</span>
         </div>
       </div>
@@ -114,25 +111,41 @@
     <h3 class="text-2xl font-bold mb-6">Ваш API токен</h3>
     <input id="tokenInput" type="password" placeholder="sk_..." 
            class="w-full bg-zinc-800 rounded-2xl px-5 py-4 text-lg outline-none mb-6">
-    <button onclick="saveToken()" 
-            class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 text-xl font-semibold rounded-3xl">Зберегти токен</button>
+    
+    <div class="flex gap-3">
+      <button onclick="saveToken()" 
+              class="flex-1 bg-emerald-600 hover:bg-emerald-700 py-4 text-lg font-semibold rounded-2xl">Зберегти</button>
+      <button onclick="deleteToken()" 
+              class="flex-1 bg-red-600/80 hover:bg-red-700 py-4 text-lg font-semibold rounded-2xl">Видалити токен</button>
+    </div>
   </div>
 </div>
 
 <script>
 // ================== ЗМІННІ ==================
-let currentToken = localStorage.getItem('voicerToken') || '';
-let history = JSON.parse(localStorage.getItem('voicerHistory') || '[]');
-let currentBlobUrl = null;
+let currentToken = '';
 
 // ================== ТОКЕН ==================
 function updateTokenStatus() {
-  document.getElementById('tokenStatus').innerHTML = currentToken 
-    ? `<span class="text-emerald-400">✓ Токен активний</span>` 
-    : `API токен`;
+  const statusEl = document.getElementById('tokenStatus');
+  if (currentToken && currentToken.startsWith('sk_')) {
+    statusEl.innerHTML = `<span class="text-emerald-400">✓ Токен активний</span>`;
+    document.getElementById('tokenButton').classList.add('border-emerald-500');
+  } else {
+    statusEl.innerHTML = `<span class="text-red-400">API токен (не підключено)</span>`;
+    document.getElementById('tokenButton').classList.remove('border-emerald-500');
+  }
 }
-function showTokenModal() { document.getElementById('tokenModal').classList.remove('hidden'); }
-function hideTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); }
+
+function showTokenModal() {
+  document.getElementById('tokenInput').value = currentToken;
+  document.getElementById('tokenModal').classList.remove('hidden');
+}
+
+function hideTokenModal() {
+  document.getElementById('tokenModal').classList.add('hidden');
+}
+
 function saveToken() {
   const val = document.getElementById('tokenInput').value.trim();
   if (val) {
@@ -143,19 +156,35 @@ function saveToken() {
   }
 }
 
-// ================== СИНТЕЗ ==================
+function deleteToken() {
+  if (confirm('Видалити токен повністю?')) {
+    currentToken = '';
+    localStorage.removeItem('voicerToken');
+    updateTokenStatus();
+    hideTokenModal();
+  }
+}
+
+// ================== СИНТЕЗ (з покращеною обробкою помилок) ==================
 async function synthesize() {
   const text = document.getElementById('textInput').value.trim();
-  if (!text) return alert('Введіть текст для озвучення');
-  if (!currentToken) return alert('Спочатку збережіть API токен!');
+  if (!text) return alert('Введіть текст');
+
+  if (!currentToken) {
+    alert('Спочатку вставте та збережіть API токен!');
+    showTokenModal();
+    return;
+  }
 
   const voiceId = document.getElementById('voiceId').value.trim();
+  if (!voiceId) return alert('Введіть Voice ID');
+
   const model = document.getElementById('modelSelect').value;
   const autoPause = document.getElementById('autoPause').checked;
   const pauseDuration = parseFloat(document.getElementById('pauseDuration').value) || 1.5;
 
   const statusEl = document.getElementById('status');
-  statusEl.textContent = 'Створення задачі...';
+  statusEl.innerHTML = '<span class="text-emerald-400">Надсилання запиту...</span>';
 
   try {
     const res = await fetch('https://voicer.mat3u.com/api/v1/voice/synthesize', {
@@ -175,89 +204,73 @@ async function synthesize() {
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Помилка ${res.status}`);
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Помилка сервера (${res.status})`);
     }
 
     const data = await res.json();
     const taskId = data.task_id;
 
-    statusEl.textContent = `Задача створена. Обробка... (${taskId})`;
+    statusEl.textContent = `Задача #${taskId} — обробка...`;
 
-    // Полінг статусу
-    const pollInterval = setInterval(async () => {
+    // Полінг
+    const poll = setInterval(async () => {
       try {
-        const statusRes = await fetch(`https://voicer.mat3u.com/api/v1/voice/status/${taskId}`, {
+        const sRes = await fetch(`https://voicer.mat3u.com/api/v1/voice/status/${taskId}`, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
-        const statusData = await statusRes.json();
+        const sData = await sRes.json();
 
-        if (statusData.status === 'completed') {
-          clearInterval(pollInterval);
-          playAudio(taskId, voiceId);
-        } else if (statusData.status === 'failed' || statusData.status === 'censored') {
-          clearInterval(pollInterval);
-          statusEl.textContent = `Помилка: ${statusData.status}`;
+        if (sData.status === 'completed') {
+          clearInterval(poll);
+          playAudio(taskId);
+        } else if (sData.status === 'failed' || sData.status === 'censored') {
+          clearInterval(poll);
+          statusEl.textContent = `Помилка: ${sData.status}`;
         }
-      } catch (e) {
-        console.error(e);
-      }
-    }, 2500);
+      } catch(e) {}
+    }, 2000);
 
   } catch (err) {
-    statusEl.textContent = 'Помилка: ' + err.message;
     console.error(err);
-    if (err.message.includes('fetch')) {
-      statusEl.innerHTML += '<br><small>Перевірте токен та підключення до інтернету</small>';
+    statusEl.innerHTML = `<span class="text-red-400">Помилка: ${err.message}</span>`;
+    if (err.message.includes('fetch') || err.message.includes('Failed')) {
+      statusEl.innerHTML += `<br><small class="text-zinc-500">Перевірте токен та підключення до інтернету</small>`;
     }
   }
 }
 
-async function playAudio(taskId, voiceId) {
+async function playAudio(taskId) {
   const statusEl = document.getElementById('status');
   statusEl.textContent = 'Завантаження аудіо...';
 
   try {
-    const audioRes = await fetch(`https://voicer.mat3u.com/api/v1/voice/download/${taskId}`, {
+    const res = await fetch(`https://voicer.mat3u.com/api/v1/voice/download/${taskId}`, {
       headers: { 'Authorization': `Bearer ${currentToken}` }
     });
 
-    if (!audioRes.ok) throw new Error('Не вдалося завантажити файл');
+    if (!res.ok) throw new Error('Не вдалося завантажити');
 
-    const blob = await audioRes.blob();
+    const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-
-    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-    currentBlobUrl = url;
 
     const player = document.getElementById('audioPlayer');
     player.src = url;
     document.getElementById('playerContainer').classList.remove('hidden');
     player.play();
 
-    // Збереження в історію
-    history.unshift({
-      id: Date.now(),
-      taskId,
-      voiceId: voiceId.substring(0, 12) + '...',
-      text: document.getElementById('textInput').value.substring(0, 100) + '...',
-      time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'})
-    });
-    if (history.length > 15) history.pop();
-    localStorage.setItem('voicerHistory', JSON.stringify(history));
-    renderHistory();
-
-    statusEl.textContent = '✅ Готово!';
+    statusEl.innerHTML = '<span class="text-emerald-400">✅ Готово!</span>';
   } catch (err) {
-    statusEl.textContent = 'Помилка завантаження аудіо';
+    statusEl.textContent = 'Помилка завантаження файлу';
   }
 }
 
 function downloadCurrent() {
-  if (currentBlobUrl) {
+  const player = document.getElementById('audioPlayer');
+  if (player.src) {
     const a = document.createElement('a');
-    a.href = currentBlobUrl;
-    a.download = `elevenlabs_${Date.now()}.mp3`;
+    a.href = player.src;
+    a.download = `voice_${Date.now()}.mp3`;
     a.click();
   }
 }
@@ -266,31 +279,21 @@ function hidePlayer() {
   document.getElementById('playerContainer').classList.add('hidden');
 }
 
-// ================== ІСТОРІЯ ==================
+// ================== ІСТОРІЯ (спрощена) ==================
+let history = JSON.parse(localStorage.getItem('voicerHistory') || '[]');
+
 function renderHistory() {
   const container = document.getElementById('historyList');
   container.innerHTML = history.map(item => `
-    <div onclick="replayHistory('${item.taskId}', '${item.voiceId}')" 
-         class="bg-zinc-800 hover:bg-zinc-700 p-3 rounded-2xl cursor-pointer text-sm">
-      <div class="flex justify-between text-xs text-zinc-400">
-        <span>${item.time}</span>
-        <span class="text-emerald-400">${item.voiceId}</span>
-      </div>
-      <div class="mt-1 line-clamp-2">${item.text}</div>
+    <div class="bg-zinc-800 p-3 rounded-2xl text-sm">
+      <div class="text-xs text-zinc-400">${item.time}</div>
+      <div class="line-clamp-2 mt-1">${item.text}</div>
     </div>
   `).join('');
 }
 
-function replayHistory(taskId, voiceId) {
-  // Можна тільки повторити синтез з тим самим voice_id, бо повний текст не зберігається
-  if (confirm('Повторити озвучення з цим голосом?')) {
-    document.getElementById('voiceId').value = voiceId.replace('...', '');
-    synthesize();
-  }
-}
-
 function clearHistory() {
-  if (confirm('Очистити всю історію?')) {
+  if (confirm('Очистити історію?')) {
     history = [];
     localStorage.setItem('voicerHistory', '[]');
     renderHistory();
@@ -302,14 +305,15 @@ function clearAll() {
   document.getElementById('charCount').textContent = '0 / 1 000 000';
 }
 
-// ================== ІНІЦІАЛІЗАЦІЯ ==================
+// ================== INIT ==================
 document.addEventListener('DOMContentLoaded', () => {
+  currentToken = localStorage.getItem('voicerToken') || '';
   updateTokenStatus();
   renderHistory();
 
-  const textarea = document.getElementById('textInput');
-  textarea.addEventListener('input', () => {
-    document.getElementById('charCount').textContent = `${textarea.value.length} / 1 000 000`;
+  const ta = document.getElementById('textInput');
+  ta.addEventListener('input', () => {
+    document.getElementById('charCount').textContent = `${ta.value.length} / 1 000 000`;
   });
 });
 </script>
