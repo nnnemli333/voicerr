@@ -3,162 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voicer — Озвучення ElevenLabs</title>
+  <title>Voicer — ElevenLabs</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', system-ui, sans-serif; }
+    .btn { transition: all 0.2s; }
     .voice-card { transition: all 0.2s; }
-    .voice-card:hover { transform: scale(1.05); }
     .selected { border: 3px solid #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3); }
-    .btn-green { background: linear-gradient(to right, #10b981, #34d399); }
-    .btn-green:hover { background: linear-gradient(to right, #059669, #10b981); }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
-<div class="max-w-5xl mx-auto p-6">
+<div class="max-w-6xl mx-auto p-6">
   <div class="flex items-center justify-between mb-8">
     <div class="flex items-center gap-3">
-      <i class="fa-solid fa-waveform text-5xl text-emerald-500"></i>
-      <h1 class="text-4xl font-bold tracking-tight">Voicer</h1>
+      <i class="fa-solid fa-waveform text-4xl text-emerald-500"></i>
+      <h1 class="text-3xl font-bold text-emerald-400">Voicer — ElevenLabs</h1>
     </div>
-    <div onclick="showTokenModal()" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-3xl cursor-pointer border border-zinc-700 transition">
+    <div onclick="showTokenModal()" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-5 py-2 rounded-2xl cursor-pointer border border-zinc-700">
       <i class="fa-solid fa-key"></i>
       <span id="tokenStatus" class="text-sm font-medium">API токен</span>
     </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    
-    <!-- SIDEBAR — ТІЛЬКИ CUSTOM VOICE -->
-    <div class="lg:col-span-3 bg-zinc-900 rounded-3xl p-6 h-fit">
-      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
-        <i class="fa-solid fa-microphone text-emerald-500"></i> Голос
-      </h2>
-      
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm text-zinc-400 mb-2">Voice ID</label>
-          <input id="voiceId" type="text" placeholder="наприклад: 21m00Tcm4TlvDq8ikWAM" 
-                 class="w-full bg-zinc-800 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
-        </div>
-        
-        <button onclick="saveVoiceId()" 
-                class="w-full btn-green text-white py-4 rounded-3xl font-semibold flex items-center justify-center gap-2">
-          <i class="fa-solid fa-check"></i> Застосувати голос
-        </button>
+    <!-- SIDEBAR -->
+    <div class="lg:col-span-3 bg-zinc-900 rounded-3xl p-6 h-fit space-y-6">
+      <div>
+        <h2 class="text-xl font-semibold mb-3 flex items-center gap-2 text-emerald-400">
+          <i class="fa-solid fa-microphone"></i> Voice ID
+        </h2>
+        <input id="voiceId" type="text" value="21m00Tcm4TlvDq8ikWAM" placeholder="Встав voice_id"
+               class="w-full bg-zinc-800 text-white rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        <p class="text-xs text-zinc-400 mt-2">Можеш використовувати будь-який voice_id з ElevenLabs</p>
       </div>
 
-      <div id="voiceStatus" class="mt-4 text-xs text-emerald-400 min-h-[20px]"></div>
+      <div>
+        <h3 class="text-sm font-medium mb-2 text-emerald-400">Модель</h3>
+        <select id="modelSelect" class="w-full bg-zinc-800 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="eleven_v3">🌟 Eleven v3 (найновіша)</option>
+          <option value="eleven_multilingual_v2">🌍 Multilingual v2</option>
+          <option value="eleven_turbo_v2_5">⚡ Turbo v2.5</option>
+          <option value="eleven_flash_v2_5">⚡ Flash v2.5</option>
+        </select>
+      </div>
     </div>
 
-    <!-- MAIN AREA — ТЕКСТ + КНОПКИ -->
+    <!-- MAIN -->
     <div class="lg:col-span-6 space-y-6">
       <div class="bg-zinc-900 rounded-3xl p-6">
-        <div class="flex justify-between items-center mb-3">
-          <label class="font-medium text-lg">Текст для озвучення</label>
-          <span id="charCount" class="text-emerald-400 text-sm font-medium">0 / 1 000 000</span>
+        <div class="flex justify-between mb-2">
+          <label class="font-medium">Текст для озвучення</label>
+          <span id="charCount" class="text-zinc-400 text-sm">0 / 1 000 000</span>
         </div>
-        <textarea id="textInput" rows="14" 
-                  class="w-full bg-zinc-800 rounded-3xl p-6 outline-none resize-none text-lg leading-relaxed"
-                  placeholder="Вставте сюди текст..."></textarea>
+        <textarea id="textInput" rows="9" class="w-full bg-zinc-800 rounded-2xl p-5 outline-none resize-none text-lg"
+                  placeholder="Вставте текст тут..."></textarea>
       </div>
 
       <div class="flex gap-4">
         <button onclick="synthesize()" 
-                class="flex-1 btn-green py-7 text-2xl font-bold rounded-3xl transition flex items-center justify-center gap-3 shadow-lg">
-          <i class="fa-solid fa-play"></i> ОЗВУЧИТИ
+                class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 py-6 text-2xl font-semibold rounded-3xl btn">
+          <i class="fa-solid fa-play mr-3"></i> ОЗВУЧИТИ
         </button>
         <button onclick="clearAll()" 
-                class="px-10 bg-zinc-800 hover:bg-zinc-700 rounded-3xl text-2xl transition">
+                class="px-8 bg-zinc-800 hover:bg-zinc-700 rounded-3xl text-xl btn">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
 
-      <!-- ПЛЕЄР -->
       <div id="playerContainer" class="hidden bg-zinc-900 rounded-3xl p-6">
         <audio id="audioPlayer" controls class="w-full"></audio>
-        <div class="flex gap-3 mt-5">
+        <div class="flex gap-3 mt-4">
           <button onclick="downloadCurrent()" 
-                  class="flex-1 bg-emerald-600 hover:bg-emerald-700 py-5 rounded-3xl flex items-center justify-center gap-2 font-medium">
+                  class="flex-1 bg-zinc-800 hover:bg-emerald-600 py-4 rounded-2xl flex items-center justify-center gap-2 btn">
             <i class="fa-solid fa-download"></i> Завантажити MP3
           </button>
           <button onclick="hidePlayer()" 
-                  class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-5 rounded-3xl font-medium">Закрити</button>
+                  class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl btn">Закрити</button>
         </div>
       </div>
 
       <div id="status" class="text-center text-sm text-zinc-400 min-h-[28px]"></div>
     </div>
 
-    <!-- ПРАВА ПАНЕЛЬ — НАЛАШТУВАННЯ -->
+    <!-- RIGHT PANEL -->
     <div class="lg:col-span-3 bg-zinc-900 rounded-3xl p-6 h-fit">
-      <h2 class="text-xl font-semibold mb-6">Налаштування</h2>
-      
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm mb-2 text-zinc-400">Модель</label>
-          <select id="modelSelect" class="w-full bg-zinc-800 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-emerald-500">
-            <option value="eleven_v3">🌟 Eleven v3 (найновіша, найвиразніша)</option>
-            <option value="eleven_multilingual_v2">🌍 Multilingual v2</option>
-            <option value="eleven_turbo_v2_5">⚡ Turbo v2.5</option>
-            <option value="eleven_flash_v2_5">⚡ Flash v2.5 (найшвидша)</option>
-          </select>
-        </div>
+      <h2 class="text-xl font-semibold mb-4 text-emerald-400">Авто-паузи</h2>
+      <div class="flex items-center justify-between mb-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-emerald-500">
+          <span>Увімкнути паузи</span>
+        </label>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-zinc-400">Тривалість:</span>
+        <input id="pauseDuration" type="number" value="1.2" step="0.1" min="0.1" max="30"
+               class="w-20 bg-zinc-800 rounded-xl px-3 py-2 text-center outline-none">
+        <span class="text-sm text-zinc-400">секунд</span>
+      </div>
 
-        <div class="pt-4 border-t border-zinc-700">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" id="autoPause" checked class="w-5 h-5 accent-emerald-500">
-            <span class="text-sm">Авто-паузи між частинами</span>
-          </label>
-          <div class="mt-4 flex items-center gap-3">
-            <span class="text-xs text-zinc-400">Тривалість паузи:</span>
-            <input id="pauseDuration" type="number" value="1.2" step="0.1" min="0.1" max="30"
-                   class="w-20 bg-zinc-800 rounded-xl px-3 py-2 text-center outline-none">
-            <span class="text-xs text-zinc-400">секунд</span>
-          </div>
-        </div>
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-4 text-emerald-400">Історія</h2>
+        <div id="historyList" class="space-y-3 max-h-80 overflow-y-auto text-sm"></div>
+        <button onclick="clearHistory()" class="mt-4 text-xs text-red-400 hover:text-red-300">Очистити історію</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL ТОКЕН -->
-<div id="tokenModal" onclick="if(event.target===this)hideTokenModal()" 
-     class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-  <div onclick="event.stopImmediatePropagation()" 
-       class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md">
-    <h3 class="text-2xl font-bold mb-6">Ваш API токен</h3>
+<!-- TOKEN MODAL -->
+<div id="tokenModal" onclick="if(event.target===this)hideTokenModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md">
+    <h3 class="text-2xl font-bold mb-6">API токен (voicer.mat3u.com)</h3>
     <input id="tokenInput" type="password" placeholder="sk_..." 
            class="w-full bg-zinc-800 rounded-2xl px-5 py-4 text-lg outline-none mb-6">
     <button onclick="saveToken()" 
-            class="w-full btn-green py-5 text-xl font-semibold rounded-3xl">Зберегти токен</button>
+            class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 text-xl font-semibold rounded-3xl">Зберегти токен</button>
   </div>
 </div>
 
 <script>
-// ====================== НАЛАШТУВАННЯ ======================
-const BASE_URL = "https://voicer.mat3u.com/api/v1";
+// ================== НАЛАШТУВАННЯ ==================
 let currentToken = localStorage.getItem('voicerToken') || '';
-let currentVoiceId = localStorage.getItem('voicerVoiceId') || '21m00Tcm4TlvDq8ikWAM'; // дефолтний
+let history = JSON.parse(localStorage.getItem('voicerHistory') || '[]');
 let currentBlobUrl = null;
 
-// ====================== ТОКЕН ======================
+// ================== ТОКЕН ==================
 function updateTokenStatus() {
-  document.getElementById('tokenStatus').innerHTML = currentToken 
-    ? '<span class="text-emerald-400">✓ Підключено</span>' 
-    : '<span class="text-amber-400">Налаштувати токен</span>';
+  document.getElementById('tokenStatus').innerHTML = currentToken ? 
+    `<span class="text-emerald-400">✓ Токен збережено</span>` : 
+    `API токен`;
 }
-
-function showTokenModal() {
-  document.getElementById('tokenModal').classList.remove('hidden');
-  document.getElementById('tokenInput').focus();
-}
-
-function hideTokenModal() {
-  document.getElementById('tokenModal').classList.add('hidden');
-}
-
+function showTokenModal() { document.getElementById('tokenModal').classList.remove('hidden'); }
+function hideTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); }
 function saveToken() {
   const token = document.getElementById('tokenInput').value.trim();
   if (token) {
@@ -169,104 +146,111 @@ function saveToken() {
   }
 }
 
-// ====================== ГОЛОС ======================
-function saveVoiceId() {
-  const id = document.getElementById('voiceId').value.trim();
-  if (!id) return alert('Введіть Voice ID');
-  
-  currentVoiceId = id;
-  localStorage.setItem('voicerVoiceId', id);
-  document.getElementById('voiceStatus').innerHTML = `✅ Голос змінено на: <b>${id}</b>`;
-  setTimeout(() => document.getElementById('voiceStatus').innerHTML = '', 4000);
-}
-
-// ====================== СИНТЕЗ ======================
+// ================== СИНТЕЗ ==================
 async function synthesize() {
   const text = document.getElementById('textInput').value.trim();
-  if (!text) return alert('Введіть текст для озвучення');
-  if (!currentToken) return alert('Спочатку введіть API токен');
+  if (!text) return alert('Введіть текст');
+  if (!currentToken) return alert('Спочатку збережи API токен');
 
-  const status = document.getElementById('status');
-  status.innerHTML = '🔄 Генерація аудіо...';
+  const voiceId = document.getElementById('voiceId').value.trim();
+  if (!voiceId) return alert('Введіть Voice ID');
 
   const model = document.getElementById('modelSelect').value;
   const autoPause = document.getElementById('autoPause').checked;
   const pauseDuration = parseFloat(document.getElementById('pauseDuration').value) || 1.2;
 
-  const payload = {
-    text: text,
-    voice_id: currentVoiceId,
-    model_id: model,
-    split_type: "smart",
-    split_output: false,
-    auto_pause_enabled: autoPause,
-    auto_pause_duration: pauseDuration
-  };
+  const statusEl = document.getElementById('status');
+  statusEl.textContent = 'Надсилання запиту...';
 
   try {
-    const res = await fetch(`${BASE_URL}/voice/synthesize`, {
+    const res = await fetch('https://voicer.mat3u.com/api/v1/voice/synthesize', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${currentToken}`
+        'Authorization': `Bearer ${currentToken}`,
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        text: text,
+        voice_id: voiceId,
+        model_id: model,
+        auto_pause_enabled: autoPause,
+        auto_pause_duration: pauseDuration,
+        split_output: false
+      })
     });
 
-    if (!res.ok) throw new Error('Помилка запиту');
-
     const data = await res.json();
-    if (data.task_id) {
-      status.innerHTML = '✅ Задача створена, очікування...';
-      pollForResult(data.task_id);
-    }
-  } catch (e) {
-    status.innerHTML = `❌ Помилка: ${e.message}`;
+    if (!res.ok) throw new Error(data.error || 'Помилка сервера');
+
+    const taskId = data.task_id;
+    statusEl.textContent = `Задача створена. Очікування... (ID: ${taskId})`;
+
+    // Полінг статусу
+    let attempts = 0;
+    const maxAttempts = 60;
+    const poll = setInterval(async () => {
+      attempts++;
+      try {
+        const statusRes = await fetch(`https://voicer.mat3u.com/api/v1/voice/status/${taskId}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const statusData = await statusRes.json();
+
+        if (statusData.status === 'completed') {
+          clearInterval(poll);
+          await playAudio(taskId, voiceId);
+        } else if (statusData.status === 'failed' || attempts > maxAttempts) {
+          clearInterval(poll);
+          statusEl.textContent = 'Помилка або таймаут';
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }, 2000);
+
+  } catch (err) {
+    statusEl.textContent = 'Помилка: ' + err.message;
+    console.error(err);
   }
 }
 
-async function pollForResult(taskId) {
-  const status = document.getElementById('status');
-  
-  const check = setInterval(async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/voice/status/${taskId}`, {
-        headers: { 'Authorization': `Bearer ${currentToken}` }
-      });
-      const data = await res.json();
-
-      if (data.status === 'completed') {
-        clearInterval(check);
-        playAudio(taskId);
-      } else if (data.status === 'failed') {
-        clearInterval(check);
-        status.innerHTML = '❌ Генерація не вдалася';
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, 1500);
-}
-
-async function playAudio(taskId) {
-  const status = document.getElementById('status');
-  status.innerHTML = '📥 Завантаження аудіо...';
+async function playAudio(taskId, voiceName) {
+  const statusEl = document.getElementById('status');
+  statusEl.textContent = 'Завантаження аудіо...';
 
   try {
-    const res = await fetch(`${BASE_URL}/voice/download/${taskId}`, {
+    const audioRes = await fetch(`https://voicer.mat3u.com/api/v1/voice/download/${taskId}`, {
       headers: { 'Authorization': `Bearer ${currentToken}` }
     });
 
-    const blob = await res.blob();
-    currentBlobUrl = URL.createObjectURL(blob);
+    if (!audioRes.ok) throw new Error('Не вдалося завантажити файл');
+
+    const blob = await audioRes.blob();
+    const url = URL.createObjectURL(blob);
+
+    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+    currentBlobUrl = url;
 
     const player = document.getElementById('audioPlayer');
-    player.src = currentBlobUrl;
+    player.src = url;
     document.getElementById('playerContainer').classList.remove('hidden');
     player.play();
-    status.innerHTML = '🎧 Готово!';
-  } catch (e) {
-    status.innerHTML = '❌ Не вдалося завантажити аудіо';
+
+    // Додаємо в історію
+    history.unshift({
+      id: Date.now(),
+      taskId: taskId,
+      voiceId: voiceName,
+      text: document.getElementById('textInput').value.substring(0, 120) + (document.getElementById('textInput').value.length > 120 ? '...' : ''),
+      time: new Date().toLocaleTimeString('uk-UA')
+    });
+    if (history.length > 20) history.pop();
+    localStorage.setItem('voicerHistory', JSON.stringify(history));
+    renderHistory();
+
+    statusEl.textContent = 'Готово!';
+  } catch (err) {
+    statusEl.textContent = 'Помилка завантаження';
   }
 }
 
@@ -274,34 +258,59 @@ function downloadCurrent() {
   if (!currentBlobUrl) return;
   const a = document.createElement('a');
   a.href = currentBlobUrl;
-  a.download = `voicer_${Date.now()}.mp3`;
+  a.download = `voice_${Date.now()}.mp3`;
   a.click();
 }
 
 function hidePlayer() {
-  const container = document.getElementById('playerContainer');
-  const player = document.getElementById('audioPlayer');
-  player.pause();
-  container.classList.add('hidden');
-  if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-  currentBlobUrl = null;
+  document.getElementById('playerContainer').classList.add('hidden');
+}
+
+// ================== ІСТОРІЯ ==================
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  container.innerHTML = '';
+  history.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'bg-zinc-800 rounded-2xl p-3 cursor-pointer hover:bg-zinc-700';
+    div.innerHTML = `
+      <div class="flex justify-between text-xs text-zinc-400">
+        <span>${item.time}</span>
+        <span class="text-emerald-400">${item.voiceId.substring(0,8)}...</span>
+      </div>
+      <div class="text-sm mt-1 line-clamp-2">${item.text}</div>
+    `;
+    div.onclick = () => replayHistory(index);
+    container.appendChild(div);
+  });
+}
+
+async function replayHistory(index) {
+  const item = history[index];
+  if (!item) return;
+  document.getElementById('textInput').value = item.text; // тільки короткий варіант, повний не зберігається
+  document.getElementById('voiceId').value = item.voiceId;
+  synthesize();
+}
+
+function clearHistory() {
+  if (confirm('Очистити всю історію?')) {
+    history = [];
+    localStorage.setItem('voicerHistory', '[]');
+    renderHistory();
+  }
 }
 
 function clearAll() {
   document.getElementById('textInput').value = '';
   document.getElementById('charCount').textContent = '0 / 1 000 000';
-  hidePlayer();
-  document.getElementById('status').innerHTML = '';
 }
 
-// ====================== ІНІЦІАЛІЗАЦІЯ ======================
+// ================== INIT ==================
 document.addEventListener('DOMContentLoaded', () => {
   updateTokenStatus();
-  
-  // Показуємо поточний voice_id
-  document.getElementById('voiceId').value = currentVoiceId;
+  renderHistory();
 
-  // Підрахунок символів
   const ta = document.getElementById('textInput');
   ta.addEventListener('input', () => {
     document.getElementById('charCount').textContent = `${ta.value.length} / 1 000 000`;
